@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Société Historique du Grand-Bouctouche</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #F5EFDF;
+      font-family: 'Lora', Georgia, serif;
+      color: #1C1408;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ── Tokens ── */
+    :root {
+      --creme:     #F5EFDF;
+      --parchemin: #EDE3C8;
+      --encre:     #1C1408;
+      --sepia:     #6B4F2A;
+      --rouille:   #9B3D1A;
+      --or:        #C49A2A;
+      --gris:      #7A6E5F;
+    }
+
+    @page { size: A4; margin: 0; }
+
+    /* ── Pages ── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      position: relative;
+      break-after: page;
+      overflow: hidden;
+    }
+
+    /* ── Typography ── */
+    h1 { font-family: 'Playfair Display', Georgia, serif; }
+    h2 { font-family: 'Playfair Display', Georgia, serif; }
+    h3 { font-family: 'Playfair Display', Georgia, serif; }
+    p  { font-family: 'Lora', Georgia, serif; }
+
+    .section-label {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 9pt;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 10px;
+    }
+
+    .gold-line {
+      height: 1px;
+      background: var(--or);
+      opacity: 0.5;
+      margin: 24px 0;
+    }
+
+    /* ── Page 1: Couverture ── */
+    .page-cover {
+      background: var(--encre);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+      min-height: 297mm;
+    }
+
+    .page-cover .logo-medallion {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 2px solid var(--or);
+      padding: 6px;
+      background: var(--creme);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    .page-cover .logo-medallion img {
+      width: 90%;
+      height: 90%;
+      object-fit: contain;
+    }
+
+    .page-cover h1 {
+      font-size: 32pt;
+      font-weight: 700;
+      color: var(--creme);
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .page-cover .tagline {
+      font-size: 12pt;
+      font-style: italic;
+      color: var(--or);
+      margin-bottom: 40px;
+    }
+
+    .gold-divider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 40px;
+    }
+    .gold-divider-row .line { flex: 1; height: 1px; background: var(--or); opacity: 0.5; }
+    .gold-divider-row .star { color: var(--or); font-size: 12pt; }
+
+    .engagements {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .engagement {
+      flex: 1 1 140px;
+      max-width: 170px;
+      text-align: center;
+    }
+    .engagement .eng-line {
+      width: 32px; height: 1px;
+      background: var(--or);
+      margin: 0 auto 12px;
+    }
+    .engagement h3 {
+      font-size: 15pt;
+      font-weight: 600;
+      color: var(--creme);
+      margin-bottom: 8px;
+    }
+    .engagement p {
+      font-size: 9pt;
+      color: var(--gris);
+      line-height: 1.65;
+    }
+
+    .cover-footer {
+      font-size: 9pt;
+      color: var(--gris);
+      letter-spacing: 0.08em;
+      margin-top: 32px;
+    }
+
+    /* ── Page 2: Mission & Valeurs ── */
+    .page-mission {
+      background: var(--creme);
+      padding: 60px 50px;
+    }
+    .page-mission h2 {
+      font-size: 24pt;
+      font-weight: 700;
+      color: var(--encre);
+      margin-bottom: 20px;
+      margin-top: 8px;
+    }
+    .page-mission p {
+      font-size: 11pt;
+      color: var(--sepia);
+      line-height: 1.85;
+      margin-bottom: 18px;
+      max-width: 500px;
+    }
+
+    .engagements-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .eng-card {
+      background: var(--parchemin);
+      padding: 24px 20px;
+      border-top: 3px solid var(--or);
+    }
+    .eng-card h3 {
+      font-size: 14pt;
+      font-weight: 700;
+      color: var(--encre);
+      margin-bottom: 10px;
+    }
+    .eng-card p {
+      font-size: 9.5pt;
+      color: var(--sepia);
+      line-height: 1.75;
+    }
+
+    /* ── Page 3: Domaines ── */
+    .page-domaines {
+      background: var(--parchemin);
+      padding: 60px 50px;
+    }
+    .page-domaines h2 {
+      font-size: 24pt;
+      font-weight: 700;
+      color: var(--encre);
+      margin-bottom: 32px;
+      margin-top: 8px;
+    }
+    .domaine-row {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 18px 0;
+      border-bottom: 1px solid #D9CEB0;
+    }
+    .domaine-row:last-child { border-bottom: none; }
+    .domaine-num {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22pt;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--or);
+      opacity: 0.7;
+      min-width: 44px;
+      line-height: 1;
+    }
+    .domaine-content h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      color: var(--encre);
+      margin-bottom: 5px;
+    }
+    .domaine-content p {
+      font-size: 9.5pt;
+      color: var(--sepia);
+      line-height: 1.65;
+    }
+
+    /* ── Page 4: Équipe ── */
+    .page-equipe {
+      background: var(--creme);
+      padding: 60px 50px;
+    }
+    .page-equipe h2 {
+      font-size: 24pt;
+      font-weight: 700;
+      color: var(--encre);
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+    .page-equipe .intro {
+      font-size: 11pt;
+      color: var(--sepia);
+      line-height: 1.85;
+      max-width: 480px;
+      margin-bottom: 36px;
+    }
+
+    .presidente-card {
+      background: var(--encre);
+      padding: 32px 36px;
+      border-top: 3px solid var(--or);
+      margin-bottom: 16px;
+    }
+    .presidente-card .pres-label {
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 8px;
+    }
+    .presidente-card h3 {
+      font-size: 18pt;
+      font-weight: 700;
+      color: var(--creme);
+      margin-bottom: 14px;
+    }
+    .presidente-card .contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .presidente-card .contact-item {
+      font-size: 10pt;
+      color: var(--gris);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .presidente-card .contact-item .icon { color: var(--or); }
+
+    .membres-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .membre-card {
+      background: var(--parchemin);
+      padding: 20px;
+    }
+    .membre-card h4 {
+      font-size: 11pt;
+      font-weight: 600;
+      color: var(--encre);
+      margin-bottom: 5px;
+    }
+    .membre-card p {
+      font-size: 9pt;
+      color: var(--gris);
+      font-style: italic;
+    }
+
+    .citation {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 12pt;
+      font-style: italic;
+      color: var(--gris);
+      border-left: 3px solid var(--or);
+      padding-left: 20px;
+      margin-top: 36px;
+      line-height: 1.6;
+    }
+
+    /* ── Page 5: Vidéos ── */
+    .page-videos {
+      background: var(--encre);
+      padding: 60px 50px;
+    }
+    .page-videos h2 {
+      font-size: 24pt;
+      font-weight: 700;
+      color: var(--creme);
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+    .page-videos .intro {
+      font-size: 11pt;
+      color: var(--gris);
+      line-height: 1.8;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+
+    .videos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .video-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(196,154,42,0.2);
+      padding: 16px 18px;
+    }
+    .video-card .v-cat {
+      font-size: 8pt;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 6px;
+    }
+    .video-card h4 {
+      font-size: 10.5pt;
+      font-weight: 600;
+      color: var(--creme);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+    .video-card p {
+      font-size: 8.5pt;
+      color: var(--gris);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .video-card .v-meta {
+      font-size: 8pt;
+      color: rgba(122,110,95,0.6);
+      font-style: italic;
+    }
+
+    @media print {
+      body { background: var(--creme); }
+      .page { break-after: page; }
+      .page-cover { min-height: 297mm; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page 1: Couverture -->
+  <div class="page page-cover">
+    <div class="logo-medallion">
+      <img src="logo.png" alt="SHGB" />
+    </div>
+
+    <p class="section-label">Grand-Bouctouche · Nouveau-Brunswick</p>
+
+    <h1>Société Historique<br />du Grand-Bouctouche</h1>
+
+    <p class="tagline">Nos mémoires sont vivantes.</p>
+
+    <div class="gold-divider-row">
+      <div class="line"></div>
+      <span class="star">✦</span>
+      <div class="line"></div>
+    </div>
+
+    <div class="engagements">
+      <div class="engagement">
+        <div class="eng-line"></div>
+        <h3>Célébrer</h3>
+        <p>Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche.</p>
+      </div>
+      <div class="engagement">
+        <div class="eng-line"></div>
+        <h3>Transmettre</h3>
+        <p>Partager cet héritage vivant avec les générations d'aujourd'hui et de demain.</p>
+      </div>
+      <div class="engagement">
+        <div class="eng-line"></div>
+        <h3>Rassembler</h3>
+        <p>Unir les citoyens autour d'une mémoire collective partagée.</p>
+      </div>
+    </div>
+
+    <div class="gold-divider-row">
+      <div class="line"></div>
+      <span class="star">✦</span>
+      <div class="line"></div>
+    </div>
+
+    <p class="cover-footer">Guide d'identité visuelle · Édition 2025</p>
+  </div>
+
+  <!-- Page 2: Mission & Valeurs -->
+  <div class="page page-mission">
+    <p class="section-label">Mission & Identité</p>
+    <div class="gold-line"></div>
+
+    <h2>Une organisation née d'un élan du cœur</h2>
+
+    <p>La Société Historique du Grand-Bouctouche est née de l'engagement de citoyennes et citoyens convaincus que leur région mérite d'être racontée, célébrée et transmise. Organisation citoyenne et non commerciale, elle documente l'histoire vivante du Grand-Bouctouche, au Nouveau-Brunswick.</p>
+
+    <p>Chaque témoignage recueilli est une victoire pour notre communauté. Chaque photo partagée, chaque document confié — c'est notre identité collective qui prend forme et qui rayonne.</p>
+
+    <div class="gold-line"></div>
+    <p class="section-label">Nos trois engagements fondamentaux</p>
+
+    <div class="engagements-grid">
+      <div class="eng-card">
+        <h3>Célébrer</h3>
+        <p>Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche, avec fierté et gratitude.</p>
+      </div>
+      <div class="eng-card">
+        <h3>Transmettre</h3>
+        <p>Partager cet héritage vivant avec les générations d'aujourd'hui et de demain, pour qu'il continue de rayonner.</p>
+      </div>
+      <div class="eng-card">
+        <h3>Rassembler</h3>
+        <p>Unir les citoyens autour d'une mémoire collective partagée, source d'appartenance et d'identité commune.</p>
+      </div>
+    </div>
+
+    <div class="gold-line"></div>
+
+    <blockquote class="citation">
+      « Connaître son passé, c'est savoir d'où l'on vient —<br />
+      et se donner les moyens de choisir où l'on va. »
+    </blockquote>
+  </div>
+
+  <!-- Page 3: Domaines couverts -->
+  <div class="page page-domaines">
+    <p class="section-label">Domaines couverts</p>
+    <div class="gold-line"></div>
+
+    <h2>Huit chapitres de la vie communautaire</h2>
+
+    <div class="domaine-row">
+      <span class="domaine-num">01</span>
+      <div class="domaine-content">
+        <h3>Sécurité publique</h3>
+        <p>L'arrivée des premiers policiers, la mise en place de la garde civile et l'histoire de l'ordre public qui a permis à notre communauté de s'épanouir.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">02</span>
+      <div class="domaine-content">
+        <h3>Culture & Arts</h3>
+        <p>La vie culturelle bouctouchoise dans toute sa vivacité : théâtre amateur, musique traditionnelle, artisanat et festivités qui font vibrer notre région.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">03</span>
+      <div class="domaine-content">
+        <h3>Sports</h3>
+        <p>Les équipes, les champions et les moments de fierté collective qui ont uni les familles du Grand-Bouctouche autour d'une passion commune.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">04</span>
+      <div class="domaine-content">
+        <h3>Éducation</h3>
+        <p>Les écoles, les enseignants dévoués et les institutions d'apprentissage qui ont façonné des générations de citoyens engagés.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">05</span>
+      <div class="domaine-content">
+        <h3>Religion</h3>
+        <p>La vie paroissiale, les communautés religieuses et le rôle essentiel du clergé dans le tissu social et culturel de notre région.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">06</span>
+      <div class="domaine-content">
+        <h3>Pêches</h3>
+        <p>La relation profonde de notre communauté avec la mer : les homardiers, les familles de pêcheurs et les traditions maritimes qui nous définissent.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">07</span>
+      <div class="domaine-content">
+        <h3>Agriculture</h3>
+        <p>Les terres cultivées avec passion, les familles paysannes et l'évolution des pratiques agricoles qui ont nourri et bâti notre région.</p>
+      </div>
+    </div>
+    <div class="domaine-row">
+      <span class="domaine-num">08</span>
+      <div class="domaine-content">
+        <h3>Industrie & Commerce</h3>
+        <p>Les entrepreneurs d'époque, les premiers commerces et l'économie locale qui ont permis au Grand-Bouctouche de prospérer et de grandir.</p>
+      </div>
+    </div>
+
+    <blockquote class="citation" style="border-left-color: #C49A2A; color: #7A6E5F; margin-top: 28px;">
+      « Ces huit chapitres ne sont pas des catégories — ce sont des portraits de familles, de voisins, de bâtisseurs. C'est notre histoire. »
+    </blockquote>
+  </div>
+
+  <!-- Page 4: Équipe -->
+  <div class="page page-equipe">
+    <p class="section-label">L'équipe fondatrice</p>
+    <div class="gold-line"></div>
+
+    <h2>Ceux qui ont posé la première pierre</h2>
+
+    <p class="intro">La Société Historique du Grand-Bouctouche est née de l'engagement de six citoyennes et citoyens qui ont répondu à l'appel avec conviction.</p>
+
+    <div class="presidente-card">
+      <p class="pres-label">Présidente fondatrice</p>
+      <h3>Pauline Bastarache</h3>
+      <div class="contacts">
+        <div class="contact-item"><span class="icon">☎</span> 506-743-8517</div>
+        <div class="contact-item"><span class="icon">☎</span> 506-955-2676</div>
+        <div class="contact-item"><span class="icon">✉</span> paulinebast@hotmail.com</div>
+      </div>
+    </div>
+
+    <div class="membres-grid">
+      <div class="membre-card">
+        <h4>Achille Bastarache</h4>
+        <p>Membre fondateur</p>
+      </div>
+      <div class="membre-card">
+        <h4>Jean Bastarache</h4>
+        <p>Membre fondateur</p>
+      </div>
+      <div class="membre-card">
+        <h4>Pierre Cormier</h4>
+        <p>Membre fondateur</p>
+      </div>
+      <div class="membre-card">
+        <h4>Jean-Paul LeBlanc</h4>
+        <p>Membre fondateur</p>
+      </div>
+      <div class="membre-card">
+        <h4>Clétus Maillet</h4>
+        <p>Membre fondateur · Conseiller municipal</p>
+      </div>
+    </div>
+
+    <blockquote class="citation">
+      « Notre mémoire est un trésor vivant. Chaque geste posé en son nom la rend plus lumineuse. »
+    </blockquote>
+  </div>
+
+  <!-- Page 5: Vidéos & Entrevues -->
+  <div class="page page-videos">
+    <p class="section-label" style="color: #C49A2A;">Archives vivantes</p>
+    <div class="gold-line"></div>
+
+    <h2>Vidéos & Entrevues</h2>
+
+    <p class="intro">Des témoins précieux nous confient leurs récits pour les générations futures. Chaque entrevue est un trésor de mémoire collective.</p>
+
+    <div class="videos-grid">
+      <div class="video-card">
+        <p class="v-cat">Sécurité publique</p>
+        <h4>Les débuts de la garde civile</h4>
+        <p>Témoignage de Robert Landry sur les premiers corps policiers de la région.</p>
+        <p class="v-meta">12:34 · 2024</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Culture & Arts</p>
+        <h4>La musique traditionnelle acadienne</h4>
+        <p>Entrevue avec Marie-Anne Thibodeau, musicienne et dépositaire du répertoire local.</p>
+        <p class="v-meta">18:22 · 2024</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Sports</p>
+        <h4>Le hockey au Grand-Bouctouche</h4>
+        <p>Souvenirs de la ligue locale et des équipes qui ont marqué les années 1960–1980.</p>
+        <p class="v-meta">24:10 · 2024</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Éducation</p>
+        <h4>L'école Saint-Jean-Baptiste</h4>
+        <p>Récits d'anciens élèves et d'enseignants sur l'éducation française en Acadie.</p>
+        <p class="v-meta">21:45 · 2025</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Pêches</p>
+        <h4>La vie des homardiers</h4>
+        <p>Les pêcheurs du Grand-Bouctouche racontent leurs saisons en mer.</p>
+        <p class="v-meta">28:55 · 2025</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Agriculture</p>
+        <h4>Les fermes d'antan</h4>
+        <p>Témoignages sur la vie agricole avant la mécanisation.</p>
+        <p class="v-meta">19:30 · 2025</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Religion</p>
+        <h4>La paroisse Sainte-Cécile</h4>
+        <p>L'histoire de notre paroisse racontée par l'abbé Cormier et des paroissiens.</p>
+        <p class="v-meta">16:08 · 2025</p>
+      </div>
+      <div class="video-card">
+        <p class="v-cat">Industrie & Commerce</p>
+        <h4>Les premiers commerces</h4>
+        <p>Entrevue avec les descendants des familles fondatrices du commerce local.</p>
+        <p class="v-meta">14:17 · 2024</p>
+      </div>
+    </div>
+
+    <div class="gold-line" style="margin-top: 32px;"></div>
+    <p style="font-family: 'Lora', Georgia, serif; font-size: 9pt; color: rgba(122,110,95,0.7); text-align: center; font-style: italic; margin-top: 12px;">
+      Société Historique du Grand-Bouctouche · Grand-Bouctouche, Nouveau-Brunswick · 2025 ✦
+    </p>
+  </div>
+
+  <script>
+    // Auto-print after fonts loaded
+    document.fonts.ready.then(function() {
+      setTimeout(function() {
+        window.print();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

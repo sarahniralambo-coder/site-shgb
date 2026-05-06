@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Société Historique du Grand-Bouctouche</title>
+  <template id="__bundler_thumbnail" data-bg-color="#F5EFDF">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="92" fill="none" stroke="#1D2B5F" stroke-width="3"/>
+      <polygon points="100,30 105,44 120,44 108,53 113,67 100,58 87,67 92,53 80,44 95,44" fill="#C49A2A"/>
+      <path d="M100,80 L100,150" stroke="#1D2B5F" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="100" cy="95" r="22" fill="#1D2B5F"/>
+      <path d="M85,150 Q70,158 60,160" stroke="#981212" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M115,150 Q130,158 140,160" stroke="#981212" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>
+  </template>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #F5EFDF; font-family: 'EB Garamond', Garamond, serif; color: #1D2B5F; overflow-x: hidden; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ── Tokens ────────────────────────────────────────────────────────────────
+    const T = {
+      creme:     '#F5EFDF',
+      parchemin: '#EDE3C8',
+      encre:     '#1D2B5F',  // Bleu marine (remplace l'ancien noir d'encre)
+      bleu:      '#1D2B5F',
+      sepia:     '#5C4A32',
+      rouille:   '#981212',  // Rouge vif (remplace l'ancien rouille)
+      rouge:     '#981212',
+      or:        '#C49A2A',
+      grisChaud: '#7A6E5F',
+    };
+
+    // ── Divider doré ──────────────────────────────────────────────────────────
+    function GoldDivider({ style }) {
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, ...style }}>
+          <div style={{ flex: 1, height: 1, background: T.or, opacity: 0.5 }}></div>
+          <span style={{ color: T.or, fontSize: 14 }}>✦</span>
+          <div style={{ flex: 1, height: 1, background: T.or, opacity: 0.5 }}></div>
+        </div>
+      );
+    }
+
+    // ── Label de section ──────────────────────────────────────────────────────
+    function SectionLabel({ children, light }) {
+      return (
+        <p style={{
+          fontFamily: 'EB Garamond, Garamond, serif',
+          fontSize: 10,
+          fontWeight: 600,
+          letterSpacing: '0.22em',
+          textTransform: 'uppercase',
+          color: light ? T.or : T.or,
+          marginBottom: 12,
+        }}>{children}</p>
+      );
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+    function Nav({ page, setPage, scrolled }) {
+      const [mobileOpen, setMobileOpen] = useState(false);
+      const navItems = [
+        { id: 'accueil',  label: 'Accueil' },
+        { id: 'histoire', label: 'Notre histoire' },
+        { id: 'videos',   label: 'Vidéos & Entrevues' },
+        { id: 'equipe',   label: 'L\'équipe' },
+        { id: 'contact',  label: 'Contact' },
+      ];
+
+      const bg = scrolled
+        ? `rgba(29,43,95,0.97)`
+        : 'transparent';
+
+      return (
+        <nav style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          background: bg,
+          backdropFilter: scrolled ? 'blur(8px)' : 'none',
+          transition: 'background 0.4s ease',
+          borderBottom: scrolled ? `1px solid rgba(196,154,42,0.2)` : 'none',
+        }}>
+          <div style={{
+            maxWidth: 1200, margin: '0 auto',
+            padding: '0 32px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            height: 68,
+          }}>
+            {/* Logo small */}
+            <button onClick={() => setPage('accueil')} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}>
+              <img src="logo-header.jpg" alt="SHGB" style={{ height: 40, width: 40, objectFit: 'contain' }} />
+              <span style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 13,
+                fontWeight: 600,
+                color: '#F5EFDF',
+                letterSpacing: '0.04em',
+                lineHeight: 1.2,
+                textAlign: 'left',
+              }}>Société Historique<br />du Grand-Bouctouche</span>
+            </button>
+
+            {/* Desktop nav */}
+            <div style={{ display: 'flex', gap: 4 }}>
+              {navItems.map(item => (
+                <button key={item.id} onClick={() => setPage(item.id)} style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontFamily: 'EB Garamond, Garamond, serif',
+                  fontSize: 13,
+                  fontWeight: page === item.id ? 600 : 400,
+                  color: page === item.id ? T.or : '#F5EFDF',
+                  padding: '6px 14px',
+                  borderRadius: 4,
+                  transition: 'color 0.2s',
+                  letterSpacing: '0.02em',
+                }}>
+                  {item.label}
+                  {page === item.id && (
+                    <div style={{
+                      height: 1, background: T.or,
+                      marginTop: 3, borderRadius: 1,
+                    }}></div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    // ── Page: Accueil ─────────────────────────────────────────────────────────
+    function PageAccueil({ setPage }) {
+      return (
+        <div>
+          {/* Hero */}
+          <section style={{
+            minHeight: '100vh',
+            background: T.encre,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            padding: '120px 32px 80px',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Texture subtile */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,154,42,0.07) 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            }}></div>
+
+            {/* Filet haut retiré — la nav fournit la séparation visuelle */}
+
+            {/* Médaillon logo */}
+            <div style={{
+              width: 200, height: 200,
+              borderRadius: '50%',
+              border: `2px solid ${T.or}`,
+              padding: 6,
+              marginBottom: 40,
+              boxShadow: `0 0 0 1px ${T.or}40, 0 8px 40px rgba(0,0,0,0.4)`,
+              background: T.creme,
+              overflow: 'hidden',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <img src="logo-v2.png" alt="Société Historique du Grand-Bouctouche"
+                style={{
+                  width: '90%', height: '90%',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+
+            <SectionLabel light>Grand-Bouctouche · Nouveau-Brunswick</SectionLabel>
+
+            <h1 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700,
+              color: T.creme,
+              textAlign: 'center',
+              lineHeight: 1.2,
+              marginBottom: 20,
+              maxWidth: 700,
+            }}>
+              Société Historique<br />du Grand-Bouctouche
+            </h1>
+
+            <p style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 16,
+              fontStyle: 'italic',
+              color: T.or,
+              textAlign: 'center',
+              marginBottom: 48,
+              letterSpacing: '0.02em',
+            }}>
+              Nos mémoires sont vivantes. Ce site les porte.
+            </p>
+
+            <GoldDivider style={{ width: '100%', maxWidth: 480, marginBottom: 48 }} />
+
+            {/* 3 engagements */}
+            <div style={{
+              display: 'flex', gap: 32, flexWrap: 'wrap',
+              justifyContent: 'center', maxWidth: 900,
+              marginBottom: 64,
+            }}>
+              {[
+                { titre: 'Célébrer', texte: 'Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche.' },
+                { titre: 'Transmettre', texte: 'Partager cet héritage vivant avec les générations d\'aujourd\'hui et de demain.' },
+                { titre: 'Rassembler', texte: 'Unir les citoyens autour d\'une mémoire collective partagée.' },
+              ].map(e => (
+                <div key={e.titre} style={{
+                  flex: '1 1 220px', maxWidth: 260,
+                  textAlign: 'center',
+                }}>
+                  <div style={{
+                    width: 40, height: 1, background: T.or,
+                    margin: '0 auto 16px',
+                  }}></div>
+                  <h3 style={{
+                    fontFamily: 'EB Garamond, Garamond, serif',
+                    fontSize: 22,
+                    fontWeight: 600,
+                    color: T.creme,
+                    marginBottom: 10,
+                  }}>{e.titre}</h3>
+                  <p style={{
+                    fontFamily: 'EB Garamond, Garamond, serif',
+                    fontSize: 14,
+                    color: T.grisChaud,
+                    lineHeight: 1.7,
+                  }}>{e.texte}</p>
+                </div>
+              ))}
+            </div>
+
+            <button onClick={() => setPage('videos')} style={{
+              background: T.rouille,
+              color: T.creme,
+              border: 'none',
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              padding: '14px 36px',
+              cursor: 'pointer',
+              transition: 'background 0.2s, transform 0.2s',
+            }}
+              onMouseEnter={e => e.currentTarget.style.background = '#7A2E12'}
+              onMouseLeave={e => e.currentTarget.style.background = T.rouille}
+            >
+              Voir nos entrevues
+            </button>
+
+            {/* Filet bas */}
+            <div style={{
+              position: 'absolute', bottom: 32, left: 64, right: 64,
+              height: 1, background: `linear-gradient(to right, transparent, ${T.or}60, transparent)`,
+            }}></div>
+          </section>
+
+          {/* Citation */}
+          <section style={{
+            background: T.parchemin,
+            padding: '80px 32px',
+            textAlign: 'center',
+          }}>
+            <GoldDivider style={{ maxWidth: 320, margin: '0 auto 48px' }} />
+            <blockquote style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(18px, 2.5vw, 26px)',
+              fontStyle: 'italic',
+              color: T.sepia,
+              maxWidth: 720,
+              margin: '0 auto 24px',
+              lineHeight: 1.6,
+            }}>
+              « Connaître son passé, c'est savoir d'où l'on vient —<br />
+              et se donner les moyens de choisir où l'on va. »
+            </blockquote>
+            <GoldDivider style={{ maxWidth: 320, margin: '0 auto 0' }} />
+          </section>
+
+          {/* Domaines */}
+          <section style={{ background: T.creme, padding: '80px 32px' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <SectionLabel>Nos domaines</SectionLabel>
+              <h2 style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 'clamp(24px, 3vw, 38px)',
+                fontWeight: 700, color: T.encre,
+                marginBottom: 48,
+              }}>Huit chapitres de notre histoire</h2>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                gap: 2,
+              }}>
+                {[
+                  { num: '01', titre: 'Sécurité publique', desc: 'L\'ordre public et la garde civile.' },
+                  { num: '02', titre: 'Culture & Arts', desc: 'Théâtre, musique, artisanat et festivités.' },
+                  { num: '03', titre: 'Sports', desc: 'Équipes et moments de fierté collective.' },
+                  { num: '04', titre: 'Éducation', desc: 'Écoles et institutions d\'apprentissage.' },
+                  { num: '05', titre: 'Religion', desc: 'La vie paroissiale et les communautés religieuses.' },
+                  { num: '06', titre: 'Pêches', desc: 'La mer, les homardiers et les traditions maritimes.' },
+                  { num: '07', titre: 'Agriculture', desc: 'Les terres cultivées et les familles paysannes.' },
+                  { num: '08', titre: 'Industrie & Commerce', desc: 'Les entrepreneurs et l\'économie locale.' },
+                ].map(d => (
+                  <div key={d.num} style={{
+                    background: T.parchemin,
+                    padding: '28px 24px',
+                    cursor: 'default',
+                    transition: 'background 0.2s',
+                    borderLeft: `3px solid ${T.or}`,
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#E6D9B8'}
+                    onMouseLeave={e => e.currentTarget.style.background = T.parchemin}
+                  >
+                    <span style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
+                      fontWeight: 600, letterSpacing: '0.18em',
+                      color: T.or, display: 'block', marginBottom: 8,
+                    }}>{d.num}</span>
+                    <h3 style={{
+                      fontFamily: 'EB Garamond, Garamond, serif',
+                      fontSize: 17, fontWeight: 600,
+                      color: T.encre, marginBottom: 8,
+                    }}>{d.titre}</h3>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                      color: T.sepia, lineHeight: 1.65,
+                    }}>{d.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* CTA vers vidéos */}
+          <section style={{
+            background: T.encre,
+            padding: '80px 32px',
+            textAlign: 'center',
+            position: 'relative',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `radial-gradient(ellipse 60% 60% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            }}></div>
+            <SectionLabel light>Témoignages vivants</SectionLabel>
+            <h2 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(24px, 3vw, 38px)',
+              fontWeight: 700, color: T.creme,
+              marginBottom: 20, maxWidth: 600, margin: '0 auto 20px',
+            }}>Entrevues & récits de notre communauté</h2>
+            <p style={{
+              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
+              color: T.grisChaud, maxWidth: 560,
+              margin: '0 auto 36px', lineHeight: 1.75,
+            }}>
+              Des témoins précieux nous confient leurs récits pour les générations futures.
+              Découvrez nos entrevues vidéo sur la vie et l'histoire du Grand-Bouctouche.
+            </p>
+            <button onClick={() => setPage('videos')} style={{
+              background: 'transparent',
+              color: T.or,
+              border: `1px solid ${T.or}`,
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 13, fontWeight: 600,
+              letterSpacing: '0.12em', textTransform: 'uppercase',
+              padding: '13px 36px', cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = T.or; e.currentTarget.style.color = T.encre; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.or; }}
+            >
+              Voir toutes les entrevues
+            </button>
+          </section>
+        </div>
+      );
+    }
+
+    // ── Page: Notre histoire ──────────────────────────────────────────────────
+    function PageHistoire() {
+      return (
+        <div style={{ paddingTop: 68 }}>
+          {/* En-tête */}
+          <section style={{
+            background: T.encre, padding: '80px 32px 64px',
+            textAlign: 'center',
+          }}>
+            <SectionLabel light>Section 01</SectionLabel>
+            <h1 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(28px, 4vw, 52px)',
+              fontWeight: 700, color: T.creme, marginBottom: 16,
+            }}>Notre histoire & identité</h1>
+            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
+          </section>
+
+          {/* Mission */}
+          <section style={{ background: T.creme, padding: '80px 32px' }}>
+            <div style={{ maxWidth: 800, margin: '0 auto' }}>
+              <SectionLabel>Mission</SectionLabel>
+              <h2 style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 24,
+              }}>Une organisation née d'un élan du cœur</h2>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16, color: T.sepia,
+                lineHeight: 1.85, marginBottom: 24,
+              }}>
+                La Société Historique du Grand-Bouctouche est née de l'engagement de citoyennes 
+                et citoyens convaincus que leur région mérite d'être racontée, célébrée et transmise. 
+                Organisation citoyenne et non commerciale, elle documente l'histoire vivante du 
+                Grand-Bouctouche, au Nouveau-Brunswick.
+              </p>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16, color: T.sepia,
+                lineHeight: 1.85,
+              }}>
+                Chaque témoignage recueilli est une victoire pour notre communauté. 
+                Chaque photo partagée, chaque document confié — c'est notre identité collective 
+                qui prend forme et qui rayonne.
+              </p>
+            </div>
+          </section>
+
+          {/* 3 engagements détaillés */}
+          <section style={{ background: T.parchemin, padding: '80px 32px' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <SectionLabel>Engagements</SectionLabel>
+              <h2 style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 48,
+              }}>Trois engagements fondamentaux</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 32 }}>
+                {[
+                  {
+                    titre: 'Célébrer',
+                    texte: 'Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche, avec fierté et gratitude. Notre région a une histoire riche qui mérite d\'être célébrée à sa juste valeur.',
+                  },
+                  {
+                    titre: 'Transmettre',
+                    texte: 'Partager cet héritage vivant avec les générations d\'aujourd\'hui et de demain, pour qu\'il continue de rayonner. Chaque entrevue, chaque document préservé est un pont entre hier et demain.',
+                  },
+                  {
+                    titre: 'Rassembler',
+                    texte: 'Unir les citoyens autour d\'une mémoire collective partagée, source d\'appartenance et d\'identité commune. La Société est un lieu de rencontre pour tous ceux qui aiment le Grand-Bouctouche.',
+                  },
+                ].map(e => (
+                  <div key={e.titre} style={{
+                    background: T.creme, padding: '36px 28px',
+                    borderTop: `3px solid ${T.or}`,
+                  }}>
+                    <h3 style={{
+                      fontFamily: 'EB Garamond, Garamond, serif',
+                      fontSize: 24, fontWeight: 700,
+                      color: T.encre, marginBottom: 16,
+                    }}>{e.titre}</h3>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.sepia, lineHeight: 1.8,
+                    }}>{e.texte}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* 8 domaines */}
+          <section style={{ background: T.creme, padding: '80px 32px' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <SectionLabel>Domaines couverts</SectionLabel>
+              <h2 style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 48,
+              }}>Huit chapitres de la vie communautaire</h2>
+
+              {[
+                { num: '01', titre: 'Sécurité publique', desc: 'L\'arrivée des premiers policiers, la mise en place de la garde civile et l\'histoire de l\'ordre public qui a permis à notre communauté de s\'épanouir.' },
+                { num: '02', titre: 'Culture & Arts', desc: 'La vie culturelle bouctouchoise dans toute sa vivacité : théâtre amateur, musique traditionnelle, artisanat et festivités qui font vibrer notre région.' },
+                { num: '03', titre: 'Sports', desc: 'Les équipes, les champions et les moments de fierté collective qui ont uni les familles du Grand-Bouctouche autour d\'une passion commune.' },
+                { num: '04', titre: 'Éducation', desc: 'Les écoles, les enseignants dévoués et les institutions d\'apprentissage qui ont façonné des générations de citoyens engagés.' },
+                { num: '05', titre: 'Religion', desc: 'La vie paroissiale, les communautés religieuses et le rôle essentiel du clergé dans le tissu social et culturel de notre région.' },
+                { num: '06', titre: 'Pêches', desc: 'La relation profonde de notre communauté avec la mer : les homardiers, les familles de pêcheurs et les traditions maritimes qui nous définissent.' },
+                { num: '07', titre: 'Agriculture', desc: 'Les terres cultivées avec passion, les familles paysannes et l\'évolution des pratiques agricoles qui ont nourri et bâti notre région.' },
+                { num: '08', titre: 'Industrie & Commerce', desc: 'Les entrepreneurs d\'époque, les premiers commerces et l\'économie locale qui ont permis au Grand-Bouctouche de prospérer et de grandir.' },
+              ].map((d, i) => (
+                <div key={d.num} style={{
+                  display: 'flex', gap: 32, alignItems: 'flex-start',
+                  padding: '28px 0',
+                  borderBottom: i < 7 ? `1px solid ${T.parchemin}` : 'none',
+                }}>
+                  <span style={{
+                    fontFamily: 'EB Garamond, Garamond, serif',
+                    fontSize: 36, fontWeight: 700,
+                    color: T.or, opacity: 0.6,
+                    minWidth: 60, lineHeight: 1,
+                    fontStyle: 'italic',
+                  }}>{d.num}</span>
+                  <div>
+                    <h3 style={{
+                      fontFamily: 'EB Garamond, Garamond, serif',
+                      fontSize: 20, fontWeight: 600,
+                      color: T.encre, marginBottom: 8,
+                    }}>{d.titre}</h3>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.sepia, lineHeight: 1.75,
+                      maxWidth: 680,
+                    }}>{d.desc}</p>
+                  </div>
+                </div>
+              ))}
+
+              <blockquote style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 18, fontStyle: 'italic',
+                color: T.grisChaud, borderLeft: `3px solid ${T.or}`,
+                paddingLeft: 24, marginTop: 48,
+              }}>
+                « Ces huit chapitres ne sont pas des catégories — ce sont des portraits de familles,
+                de voisins, de bâtisseurs. C'est notre histoire. »
+              </blockquote>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // ── Page: Vidéos & Entrevues ──────────────────────────────────────────────
+    const CATEGORIES = ['Toutes', 'Sécurité publique', 'Culture & Arts', 'Sports', 'Éducation', 'Religion', 'Pêches', 'Agriculture', 'Industrie & Commerce'];
+
+    const PLACEHOLDER_VIDEOS = [
+      { id: 1, titre: 'Les débuts de la garde civile', desc: 'Témoignage de Robert Landry sur les premiers corps policiers de la région.', categorie: 'Sécurité publique', duree: '12:34', date: '2024' },
+      { id: 2, titre: 'La musique traditionnelle acadienne', desc: 'Entrevue avec Marie-Anne Thibodeau, musicienne et dépositaire du répertoire local.', categorie: 'Culture & Arts', duree: '18:22', date: '2024' },
+      { id: 3, titre: 'Le hockey au Grand-Bouctouche', desc: 'Souvenirs de la ligue locale et des équipes qui ont marqué les années 1960–1980.', categorie: 'Sports', duree: '24:10', date: '2024' },
+      { id: 4, titre: 'L\'école Saint-Jean-Baptiste', desc: 'Récits d\'anciens élèves et d\'enseignants sur l\'éducation française en Acadie.', categorie: 'Éducation', duree: '21:45', date: '2025' },
+      { id: 5, titre: 'La paroisse Sainte-Cécile', desc: 'L\'histoire de notre paroisse racontée par l\'abbé Cormier et des paroissiens de longue date.', categorie: 'Religion', duree: '16:08', date: '2025' },
+      { id: 6, titre: 'La vie des homardiers', desc: 'Les pêcheurs du Grand-Bouctouche racontent leurs saisons en mer et les traditions transmises.', categorie: 'Pêches', duree: '28:55', date: '2025' },
+      { id: 7, titre: 'Les fermes d\'antan', desc: 'Témoignages sur la vie agricole avant la mécanisation et les transformations du XXe siècle.', categorie: 'Agriculture', duree: '19:30', date: '2025' },
+      { id: 8, titre: 'Les premiers commerces', desc: 'Entrevue avec les descendants des familles fondatrices du commerce local.', categorie: 'Industrie & Commerce', duree: '14:17', date: '2024' },
+      { id: 9, titre: 'Chants de mer et berceuses', desc: 'Collection de chants traditionnels recueillis auprès des aînés de la région.', categorie: 'Culture & Arts', duree: '32:00', date: '2025' },
+    ];
+
+    function VideoCard({ video, onClick }) {
+      const [hovered, setHovered] = useState(false);
+      return (
+        <div
+          onClick={() => onClick(video)}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            cursor: 'pointer',
+            background: hovered ? '#E6D9B8' : T.parchemin,
+            transition: 'background 0.25s, transform 0.25s, box-shadow 0.25s',
+            transform: hovered ? 'translateY(-4px)' : 'none',
+            boxShadow: hovered ? '0 8px 32px rgba(29,43,95,0.12)' : 'none',
+          }}
+        >
+          {/* Thumbnail placeholder */}
+          <div style={{
+            width: '100%', paddingBottom: '56.25%',
+            position: 'relative', background: T.encre, overflow: 'hidden',
+          }}>
+            {/* Striped placeholder */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `repeating-linear-gradient(
+                -45deg,
+                rgba(196,154,42,0.06) 0px, rgba(196,154,42,0.06) 2px,
+                transparent 2px, transparent 12px
+              )`,
+            }}></div>
+            {/* Bouton play */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexDirection: 'column', gap: 8,
+            }}>
+              <div style={{
+                width: 52, height: 52, borderRadius: '50%',
+                border: `2px solid ${T.or}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.2s',
+                background: hovered ? `${T.or}22` : 'transparent',
+              }}>
+                <div style={{
+                  width: 0, height: 0,
+                  borderTop: '10px solid transparent',
+                  borderBottom: '10px solid transparent',
+                  borderLeft: `16px solid ${T.or}`,
+                  marginLeft: 4,
+                }}></div>
+              </div>
+              <span style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
+                color: T.grisChaud, letterSpacing: '0.05em',
+              }}>{video.duree}</span>
+            </div>
+            {/* Catégorie badge */}
+            <div style={{
+              position: 'absolute', top: 12, left: 12,
+              background: `${T.encre}CC`,
+              padding: '4px 10px',
+            }}>
+              <span style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 9,
+                fontWeight: 600, letterSpacing: '0.15em',
+                textTransform: 'uppercase', color: T.or,
+              }}>{video.categorie}</span>
+            </div>
+          </div>
+
+          {/* Contenu */}
+          <div style={{ padding: '20px 20px 24px' }}>
+            <h3 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 17, fontWeight: 600,
+              color: T.encre, marginBottom: 8,
+              lineHeight: 1.35,
+            }}>{video.titre}</h3>
+            <p style={{
+              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+              color: T.sepia, lineHeight: 1.65,
+              marginBottom: 14,
+            }}>{video.desc}</p>
+            <span style={{
+              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
+              color: T.grisChaud, fontStyle: 'italic',
+            }}>{video.date}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function VideoModal({ video, onClose }) {
+      useEffect(() => {
+        const handler = (e) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+      }, [onClose]);
+
+      return (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(29,43,95,0.92)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: 24,
+        }} onClick={onClose}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: T.encre,
+              maxWidth: 800, width: '100%',
+              border: `1px solid ${T.or}40`,
+            }}
+          >
+            {/* Vidéo placeholder */}
+            <div style={{
+              width: '100%', paddingBottom: '56.25%', position: 'relative',
+              background: '#0D0A04',
+            }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                backgroundImage: `repeating-linear-gradient(
+                  -45deg,
+                  rgba(196,154,42,0.04) 0px, rgba(196,154,42,0.04) 2px,
+                  transparent 2px, transparent 14px
+                )`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexDirection: 'column', gap: 12,
+              }}>
+                <div style={{ color: T.or, fontSize: 13, fontFamily: 'EB Garamond, Garamond, serif', letterSpacing: '0.08em' }}>
+                  ▶ Emplacement vidéo — {video.titre}
+                </div>
+                <div style={{ color: T.grisChaud, fontSize: 11, fontFamily: 'EB Garamond, Garamond, serif', fontStyle: 'italic' }}>
+                  Insérez l'URL YouTube ou Vimeo ici
+                </div>
+              </div>
+            </div>
+
+            {/* Info */}
+            <div style={{ padding: '28px 32px 32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+                <div>
+                  <span style={{
+                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 9, fontWeight: 600,
+                    letterSpacing: '0.18em', textTransform: 'uppercase',
+                    color: T.or, display: 'block', marginBottom: 8,
+                  }}>{video.categorie} · {video.duree} · {video.date}</span>
+                  <h2 style={{
+                    fontFamily: 'EB Garamond, Garamond, serif',
+                    fontSize: 24, fontWeight: 700,
+                    color: T.creme, marginBottom: 12,
+                  }}>{video.titre}</h2>
+                  <p style={{
+                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                    color: T.grisChaud, lineHeight: 1.75,
+                  }}>{video.desc}</p>
+                </div>
+                <button onClick={onClose} style={{
+                  background: 'none', border: `1px solid ${T.or}40`,
+                  color: T.grisChaud, cursor: 'pointer',
+                  width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18, flexShrink: 0,
+                  transition: 'border-color 0.2s, color 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = T.or; e.currentTarget.style.color = T.or; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = `${T.or}40`; e.currentTarget.style.color = T.grisChaud; }}
+                >✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function PageVideos() {
+      const [categorie, setCategorie] = useState('Toutes');
+      const [selectedVideo, setSelectedVideo] = useState(null);
+      const [search, setSearch] = useState('');
+
+      const filtered = PLACEHOLDER_VIDEOS.filter(v => {
+        const matchCat = categorie === 'Toutes' || v.categorie === categorie;
+        const matchSearch = search === '' ||
+          v.titre.toLowerCase().includes(search.toLowerCase()) ||
+          v.desc.toLowerCase().includes(search.toLowerCase());
+        return matchCat && matchSearch;
+      });
+
+      return (
+        <div style={{ paddingTop: 68 }}>
+          {/* En-tête */}
+          <section style={{
+            background: T.encre, padding: '64px 32px 56px',
+            position: 'relative',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0,
+              backgroundImage: `radial-gradient(ellipse 80% 70% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%)`,
+              pointerEvents: 'none',
+            }}></div>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <SectionLabel light>Archives vivantes</SectionLabel>
+              <h1 style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 'clamp(28px, 4vw, 48px)',
+                fontWeight: 700, color: T.creme,
+                marginBottom: 16, maxWidth: 640,
+              }}>Vidéos & Entrevues</h1>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
+                color: T.grisChaud, maxWidth: 600,
+                lineHeight: 1.75, marginBottom: 32,
+              }}>
+                Des témoins précieux nous confient leurs récits pour les générations futures.
+                Chaque entrevue est un trésor de mémoire collective.
+              </p>
+
+              {/* Barre de recherche */}
+              <div style={{ position: 'relative', maxWidth: 480 }}>
+                <input
+                  type="text"
+                  placeholder="Rechercher une entrevue…"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: 'rgba(255,255,255,0.07)',
+                    border: `1px solid ${T.or}40`,
+                    color: T.creme,
+                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                    padding: '12px 16px 12px 42px',
+                    outline: 'none',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onFocus={e => e.target.style.borderColor = T.or}
+                  onBlur={e => e.target.style.borderColor = `${T.or}40`}
+                />
+                <span style={{
+                  position: 'absolute', left: 14, top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: T.or, fontSize: 14, pointerEvents: 'none',
+                }}>⌕</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Filtres */}
+          <div style={{
+            background: T.parchemin,
+            borderBottom: `1px solid ${T.or}30`,
+            padding: '0 32px',
+            position: 'sticky', top: 68, zIndex: 90,
+          }}>
+            <div style={{
+              maxWidth: 1100, margin: '0 auto',
+              display: 'flex', gap: 4, overflowX: 'auto',
+              padding: '12px 0',
+            }}>
+              {CATEGORIES.map(cat => (
+                <button key={cat} onClick={() => setCategorie(cat)} style={{
+                  background: categorie === cat ? T.encre : 'transparent',
+                  color: categorie === cat ? T.or : T.sepia,
+                  border: categorie === cat ? 'none' : `1px solid ${T.or}30`,
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
+                  fontWeight: categorie === cat ? 600 : 400,
+                  padding: '7px 16px', cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  letterSpacing: '0.04em',
+                  transition: 'all 0.2s',
+                }}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Grille vidéos */}
+          <section style={{ background: T.creme, padding: '48px 32px 80px' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              {filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                  <p style={{ fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16, color: T.grisChaud, fontStyle: 'italic' }}>
+                    Aucune entrevue trouvée.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p style={{
+                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                    color: T.grisChaud, marginBottom: 28,
+                    fontStyle: 'italic',
+                  }}>
+                    {filtered.length} entrevue{filtered.length > 1 ? 's' : ''}{categorie !== 'Toutes' ? ` — ${categorie}` : ''}
+                  </p>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: 2,
+                  }}>
+                    {filtered.map(v => (
+                      <VideoCard key={v.id} video={v} onClick={setSelectedVideo} />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+
+          {/* Modal */}
+          {selectedVideo && (
+            <VideoModal video={selectedVideo} onClose={() => setSelectedVideo(null)} />
+          )}
+        </div>
+      );
+    }
+
+    // ── Page: L'équipe ────────────────────────────────────────────────────────
+    function PageEquipe() {
+      return (
+        <div style={{ paddingTop: 68 }}>
+          <section style={{
+            background: T.encre, padding: '64px 32px 56px', textAlign: 'center',
+          }}>
+            <SectionLabel light>Section 07</SectionLabel>
+            <h1 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700, color: T.creme, marginBottom: 16,
+            }}>L'équipe fondatrice</h1>
+            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
+          </section>
+
+          <section style={{ background: T.creme, padding: '80px 32px' }}>
+            <div style={{ maxWidth: 900, margin: '0 auto' }}>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16,
+                color: T.sepia, lineHeight: 1.85,
+                marginBottom: 64, maxWidth: 680,
+              }}>
+                La Société Historique du Grand-Bouctouche est née de l'engagement de six
+                citoyennes et citoyens qui ont répondu à l'appel avec conviction. Ce sont
+                eux qui ont posé la première pierre de cet édifice mémoriel.
+              </p>
+
+              {/* Présidente */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 2,
+                marginBottom: 2,
+              }}>
+                <div style={{
+                  background: T.encre, padding: '48px 40px',
+                  gridColumn: '1 / -1',
+                  borderTop: `3px solid ${T.or}`,
+                }}>
+                  <SectionLabel light>Présidente fondatrice</SectionLabel>
+                  <h2 style={{
+                    fontFamily: 'EB Garamond, Garamond, serif',
+                    fontSize: 28, fontWeight: 700,
+                    color: T.creme, marginBottom: 16,
+                  }}>Pauline Bastarache</h2>
+                  <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+                    <a href="tel:5067438517" style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.grisChaud, textDecoration: 'none',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                      <span style={{ color: T.or }}>☎</span> 506-743-8517
+                    </a>
+                    <a href="tel:5069552676" style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.grisChaud, textDecoration: 'none',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                      <span style={{ color: T.or }}>☎</span> 506-955-2676
+                    </a>
+                    <a href="mailto:paulinebast@hotmail.com" style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.rouille, textDecoration: 'none',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                    }}>
+                      <span style={{ color: T.or }}>✉</span> paulinebast@hotmail.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Membres fondateurs */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                gap: 2,
+              }}>
+                {[
+                  { nom: 'Achille Bastarache', role: 'Membre fondateur' },
+                  { nom: 'Jean Bastarache', role: 'Membre fondateur' },
+                  { nom: 'Pierre Cormier', role: 'Membre fondateur' },
+                  { nom: 'Jean-Paul LeBlanc', role: 'Membre fondateur' },
+                  { nom: 'Clétus Maillet', role: 'Membre fondateur · Conseiller municipal' },
+                ].map(m => (
+                  <div key={m.nom} style={{
+                    background: T.parchemin, padding: '28px 24px',
+                  }}>
+                    <h3 style={{
+                      fontFamily: 'EB Garamond, Garamond, serif',
+                      fontSize: 17, fontWeight: 600,
+                      color: T.encre, marginBottom: 8,
+                    }}>{m.nom}</h3>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
+                      color: T.grisChaud, fontStyle: 'italic',
+                    }}>{m.role}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Membres */}
+              <div style={{ marginTop: 64 }}>
+                <p style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
+                  fontWeight: 600, letterSpacing: '0.22em',
+                  textTransform: 'uppercase', color: T.or,
+                  marginBottom: 12,
+                }}>Membres</p>
+                <h2 style={{
+                  fontFamily: 'EB Garamond, Garamond, serif',
+                  fontSize: 28, fontWeight: 700,
+                  color: T.encre, marginBottom: 24,
+                }}>Nos membres</h2>
+                <p style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
+                  color: T.sepia, lineHeight: 1.85,
+                  marginBottom: 32, maxWidth: 680,
+                }}>
+                  La Société rassemble des citoyennes et citoyens engagés qui contribuent,
+                  chacun à leur façon, à documenter et célébrer notre mémoire collective.
+                </p>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gap: 2,
+                }}>
+                  {[
+                    { nom: 'John LeRoux', role: 'Membre' },
+                    { nom: 'Louise Richard', role: 'Membre' },
+                  ].map(m => (
+                    <div key={m.nom} style={{
+                      background: T.parchemin, padding: '28px 24px',
+                    }}>
+                      <h3 style={{
+                        fontFamily: 'EB Garamond, Garamond, serif',
+                        fontSize: 17, fontWeight: 600,
+                        color: T.encre, marginBottom: 8,
+                      }}>{m.nom}</h3>
+                      <p style={{
+                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
+                        color: T.grisChaud, fontStyle: 'italic',
+                      }}>{m.role}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <blockquote style={{
+                fontFamily: 'EB Garamond, Garamond, serif',
+                fontSize: 18, fontStyle: 'italic',
+                color: T.grisChaud,
+                borderLeft: `3px solid ${T.or}`,
+                paddingLeft: 24, marginTop: 64,
+              }}>
+                « Notre mémoire est un trésor vivant. Chaque geste posé en son nom la rend plus lumineuse. »
+              </blockquote>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // ── Page: Contact ─────────────────────────────────────────────────────────
+    function PageContact() {
+      const [sent, setSent] = useState(false);
+      const [form, setForm] = useState({ nom: '', email: '', message: '' });
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setSent(true);
+      };
+
+      return (
+        <div style={{ paddingTop: 68 }}>
+          <section style={{
+            background: T.encre, padding: '64px 32px 56px', textAlign: 'center',
+          }}>
+            <SectionLabel light>Rejoignez-nous</SectionLabel>
+            <h1 style={{
+              fontFamily: 'EB Garamond, Garamond, serif',
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700, color: T.creme, marginBottom: 16,
+            }}>Contact</h1>
+            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
+          </section>
+
+          <section style={{ background: T.creme, padding: '80px 32px' }}>
+            <div style={{
+              maxWidth: 900, margin: '0 auto',
+              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64,
+            }}>
+              {/* Coordonnées */}
+              <div>
+                <SectionLabel>Coordonnées</SectionLabel>
+                <h2 style={{
+                  fontFamily: 'EB Garamond, Garamond, serif',
+                  fontSize: 26, fontWeight: 700,
+                  color: T.encre, marginBottom: 24,
+                }}>Pauline Bastarache</h2>
+                <p style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                  color: T.sepia, lineHeight: 1.8, marginBottom: 24,
+                  fontStyle: 'italic',
+                }}>Présidente fondatrice<br />Société Historique du Grand-Bouctouche</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {[
+                    { icon: '☎', label: '506-743-8517', href: 'tel:5067438517' },
+                    { icon: '☎', label: '506-955-2676', href: 'tel:5069552676' },
+                    { icon: '✉', label: 'paulinebast@hotmail.com', href: 'mailto:paulinebast@hotmail.com' },
+                  ].map(c => (
+                    <a key={c.label} href={c.href} style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
+                      color: T.sepia, textDecoration: 'none',
+                      transition: 'color 0.2s',
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.color = T.rouille}
+                      onMouseLeave={e => e.currentTarget.style.color = T.sepia}
+                    >
+                      <span style={{
+                        color: T.or, fontSize: 16, width: 24,
+                        textAlign: 'center',
+                      }}>{c.icon}</span>
+                      {c.label}
+                    </a>
+                  ))}
+                </div>
+
+                <GoldDivider style={{ margin: '40px 0' }} />
+                <p style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                  color: T.grisChaud, lineHeight: 1.8,
+                }}>
+                  Grand-Bouctouche, Nouveau-Brunswick, Canada
+                </p>
+              </div>
+
+              {/* Formulaire */}
+              <div>
+                <SectionLabel>Nous écrire</SectionLabel>
+                <h2 style={{
+                  fontFamily: 'EB Garamond, Garamond, serif',
+                  fontSize: 26, fontWeight: 700,
+                  color: T.encre, marginBottom: 24,
+                }}>Partagez vos souvenirs</h2>
+
+                {sent ? (
+                  <div style={{
+                    background: T.parchemin, padding: '32px',
+                    borderTop: `3px solid ${T.or}`,
+                    textAlign: 'center',
+                  }}>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif',
+                      fontSize: 18, fontStyle: 'italic',
+                      color: T.sepia,
+                    }}>Merci pour votre message!</p>
+                    <p style={{
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                      color: T.grisChaud, marginTop: 12,
+                    }}>Pauline vous contactera sous peu.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {[
+                      { id: 'nom', label: 'Nom', type: 'text', placeholder: 'Votre nom complet' },
+                      { id: 'email', label: 'Courriel', type: 'email', placeholder: 'votre@courriel.ca' },
+                    ].map(f => (
+                      <div key={f.id}>
+                        <label style={{
+                          fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
+                          fontWeight: 600, letterSpacing: '0.15em',
+                          textTransform: 'uppercase', color: T.or,
+                          display: 'block', marginBottom: 6,
+                        }}>{f.label}</label>
+                        <input
+                          type={f.type} required
+                          placeholder={f.placeholder}
+                          value={form[f.id]}
+                          onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
+                          style={{
+                            width: '100%',
+                            background: T.parchemin,
+                            border: `1px solid ${T.or}30`,
+                            fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                            color: T.encre, padding: '10px 14px',
+                            outline: 'none',
+                          }}
+                          onFocus={e => e.target.style.borderColor = T.or}
+                          onBlur={e => e.target.style.borderColor = `${T.or}30`}
+                        />
+                      </div>
+                    ))}
+                    <div>
+                      <label style={{
+                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
+                        fontWeight: 600, letterSpacing: '0.15em',
+                        textTransform: 'uppercase', color: T.or,
+                        display: 'block', marginBottom: 6,
+                      }}>Message</label>
+                      <textarea
+                        required rows={5}
+                        placeholder="Partagez vos souvenirs, documents ou témoignages…"
+                        value={form.message}
+                        onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
+                        style={{
+                          width: '100%',
+                          background: T.parchemin,
+                          border: `1px solid ${T.or}30`,
+                          fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
+                          color: T.encre, padding: '10px 14px',
+                          resize: 'vertical', outline: 'none',
+                        }}
+                        onFocus={e => e.target.style.borderColor = T.or}
+                        onBlur={e => e.target.style.borderColor = `${T.or}30`}
+                      />
+                    </div>
+                    <button type="submit" style={{
+                      background: T.rouille, color: T.creme,
+                      border: 'none',
+                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                      fontWeight: 600, letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      padding: '14px', cursor: 'pointer',
+                      transition: 'background 0.2s',
+                      alignSelf: 'flex-start', minWidth: 200,
+                    }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#7A2E12'}
+                      onMouseLeave={e => e.currentTarget.style.background = T.rouille}
+                    >
+                      Envoyer le message
+                    </button>
+                  </form>
+                )}
+              </div>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // ── Footer ────────────────────────────────────────────────────────────────
+    function Footer({ setPage }) {
+      return (
+        <footer style={{
+          background: T.encre,
+          padding: '48px 32px 32px',
+          borderTop: `1px solid ${T.or}20`,
+        }}>
+          <div style={{
+            maxWidth: 1100, margin: '0 auto',
+            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
+            gap: 48, marginBottom: 40,
+          }}>
+            {/* Logo + nom */}
+            <div>
+              <img src="logo-v2.png" alt="SHGB"
+                style={{
+                  height: 80, width: 80,
+                  objectFit: 'contain',
+                  borderRadius: '50%',
+                  background: T.creme,
+                  padding: 4,
+                  marginBottom: 16, display: 'block',
+                }}
+              />
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                color: T.grisChaud, lineHeight: 1.7,
+              }}>
+                Société Historique du Grand-Bouctouche<br />
+                Grand-Bouctouche, Nouveau-Brunswick
+              </p>
+            </div>
+
+            {/* Navigation */}
+            <div>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
+                fontWeight: 600, letterSpacing: '0.18em',
+                textTransform: 'uppercase', color: T.or,
+                marginBottom: 16,
+              }}>Navigation</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { id: 'accueil', label: 'Accueil' },
+                  { id: 'histoire', label: 'Notre histoire' },
+                  { id: 'videos', label: 'Vidéos & Entrevues' },
+                  { id: 'equipe', label: 'L\'équipe' },
+                  { id: 'contact', label: 'Contact' },
+                ].map(item => (
+                  <button key={item.id} onClick={() => setPage(item.id)} style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                    color: T.grisChaud, textAlign: 'left',
+                    padding: 0, transition: 'color 0.2s',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.color = T.creme}
+                    onMouseLeave={e => e.currentTarget.style.color = T.grisChaud}
+                  >{item.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact rapide */}
+            <div>
+              <p style={{
+                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
+                fontWeight: 600, letterSpacing: '0.18em',
+                textTransform: 'uppercase', color: T.or,
+                marginBottom: 16,
+              }}>Contact</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <a href="tel:5067438517" style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                  color: T.grisChaud, textDecoration: 'none',
+                }}>506-743-8517</a>
+                <a href="mailto:paulinebast@hotmail.com" style={{
+                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
+                  color: T.grisChaud, textDecoration: 'none',
+                }}>paulinebast@hotmail.com</a>
+              </div>
+            </div>
+          </div>
+
+          <GoldDivider />
+
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginTop: 24, flexWrap: 'wrap', gap: 12,
+          }}>
+            <p style={{
+              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
+              color: T.grisChaud,
+            }}>
+              © 2025 Société Historique du Grand-Bouctouche. Tous droits réservés.
+            </p>
+            <p style={{
+              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
+              color: `${T.grisChaud}80`, fontStyle: 'italic',
+            }}>
+              Notre mémoire est un trésor vivant. ✦
+            </p>
+          </div>
+        </footer>
+      );
+    }
+
+    // ── App principal ─────────────────────────────────────────────────────────
+    function App() {
+      const [page, setPage] = useState('accueil');
+      useEffect(() => { window.__setPage = setPage; return () => { delete window.__setPage; }; }, [setPage]);
+      const [scrolled, setScrolled] = useState(false);
+
+      const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+        "accentColor": "#9B3D1A",
+        "fontStyle": "serif",
+        "heroDark": true
+      }/*EDITMODE-END*/;
+
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+      useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 40);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      // Scroll to top on page change
+      useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }, [page]);
+
+      const pageContent = () => {
+        switch (page) {
+          case 'accueil':  return <PageAccueil setPage={setPage} />;
+          case 'histoire': return <PageHistoire />;
+          case 'videos':   return <PageVideos />;
+          case 'equipe':   return <PageEquipe />;
+          case 'contact':  return <PageContact />;
+          default:         return <PageAccueil setPage={setPage} />;
+        }
+      };
+
+      return (
+        <div>
+          <Nav page={page} setPage={setPage} scrolled={page !== 'accueil' || scrolled} />
+          <main>{pageContent()}</main>
+          <Footer setPage={setPage} />
+
+          <TweaksPanel>
+            <TweakSection label="Couleur d'accent">
+              <TweakColor
+                label="Rouille / CTA"
+                tweakKey="accentColor"
+                value={tweaks.accentColor}
+                onChange={v => setTweak('accentColor', v)}
+              />
+            </TweakSection>
+            <TweakSection label="Style">
+              <TweakToggle
+                label="Hero sombre"
+                tweakKey="heroDark"
+                value={tweaks.heroDark}
+                onChange={v => setTweak('heroDark', v)}
+              />
+              <TweakRadio
+                label="Police"
+                tweakKey="fontStyle"
+                value={tweaks.fontStyle}
+                options={[{ value: 'serif', label: 'Lora' }, { value: 'display', label: 'Playfair' }]}
+                onChange={v => setTweak('fontStyle', v)}
+              />
+            </TweakSection>
+          </TweaksPanel>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
