@@ -7,1309 +7,1164 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body { background: #F5EFDF; font-family: 'EB Garamond', Garamond, serif; color: #1D2B5F; overflow-x: hidden; }
-    #root { min-height: 100vh; }
 
-    /* Mobile nav */
+    /* ── Tokens ── */
+    :root {
+      --creme:     #F5EFDF;
+      --parchemin: #EDE3C8;
+      --encre:     #1D2B5F;
+      --sepia:     #5C4A32;
+      --rouge:     #981212;
+      --or:        #C49A2A;
+      --gris:      #7A6E5F;
+    }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: transparent;
+      transition: background 0.4s ease, border-color 0.4s ease;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(29,43,95,0.97);
+      backdrop-filter: blur(8px);
+      border-bottom-color: rgba(196,154,42,0.2);
+    }
+    nav.solid { background: rgba(29,43,95,0.97); border-bottom-color: rgba(196,154,42,0.2); }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+    }
+    .nav-brand {
+      background: none; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .nav-brand img { height: 40px; width: 40px; object-fit: contain; }
+    .nav-brand span {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 13px; font-weight: 600;
+      color: #F5EFDF; letter-spacing: 0.04em;
+      line-height: 1.2; text-align: left;
+    }
+    .nav-links { display: flex; gap: 4px; }
+    .nav-link {
+      background: none; border: none; cursor: pointer;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 13px; font-weight: 400;
+      color: #F5EFDF;
+      padding: 6px 14px; border-radius: 4px;
+      transition: color 0.2s;
+      letter-spacing: 0.02em;
+    }
+    .nav-link:hover { color: var(--or); }
+    .nav-link.active { color: var(--or); font-weight: 600; }
+    .nav-hamburger {
+      display: none; background: none; border: none;
+      cursor: pointer; color: #F5EFDF; font-size: 22px; padding: 8px;
+    }
+    .nav-mobile {
+      display: none;
+      background: rgba(29,43,95,0.98);
+      border-top: 1px solid rgba(196,154,42,0.2);
+      padding: 16px 32px 24px;
+    }
+    .nav-mobile.open { display: block; }
+    .nav-mobile-link {
+      display: block; width: 100%; text-align: left;
+      background: none; border: none; cursor: pointer;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 16px; color: #F5EFDF;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(196,154,42,0.1);
+      letter-spacing: 0.02em;
+    }
+    .nav-mobile-link.active { color: var(--or); font-weight: 600; }
+
     @media (max-width: 768px) {
-      .nav-desktop { display: none !important; }
-      .nav-mobile-btn { display: flex !important; }
-      .mobile-menu { display: block !important; }
-      .contact-grid { grid-template-columns: 1fr !important; }
-      .footer-grid { grid-template-columns: 1fr !important; }
-      .equipe-grid { grid-template-columns: 1fr !important; }
-    }
-    @media (min-width: 769px) {
-      .nav-mobile-btn { display: none !important; }
-      .mobile-menu { display: none !important; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: block; }
     }
 
-    /* Scrollbar for filter row */
-    .filter-scroll::-webkit-scrollbar { height: 0; }
-    .filter-scroll { scrollbar-width: none; }
+    /* ── Gold divider ── */
+    .gold-divider {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .gold-divider::before,
+    .gold-divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--or); opacity: 0.5;
+    }
+    .gold-divider-icon { color: var(--or); font-size: 14px; }
 
-    /* Input placeholder color */
-    ::placeholder { color: #7A6E5F; opacity: 0.7; }
+    /* ── Section label ── */
+    .section-label {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: var(--or); margin-bottom: 12px;
+    }
+
+    /* ── Buttons ── */
+    .btn-rouge {
+      background: var(--rouge); color: var(--creme); border: none;
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 14px 36px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-rouge:hover { background: #7A2E12; }
+    .btn-or {
+      background: transparent; color: var(--or);
+      border: 1px solid var(--or);
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 13px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 13px 36px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-or:hover { background: var(--or); color: var(--encre); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; background: var(--encre);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 120px 32px 80px;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,154,42,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-bottom-rule {
+      position: absolute; bottom: 32px; left: 64px; right: 64px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(196,154,42,0.6), transparent);
+    }
+    .medallion {
+      width: 200px; height: 200px; border-radius: 50%;
+      border: 2px solid var(--or); padding: 6px; margin-bottom: 40px;
+      box-shadow: 0 0 0 1px rgba(196,154,42,0.25), 0 8px 40px rgba(0,0,0,0.4);
+      background: var(--creme); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .medallion img { width: 90%; height: 90%; object-fit: contain; }
+    .hero h1 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(28px, 4vw, 48px); font-weight: 700;
+      color: var(--creme); text-align: center;
+      line-height: 1.2; margin-bottom: 20px; max-width: 700px;
+    }
+    .hero-tagline {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 16px; font-style: italic;
+      color: var(--or); text-align: center;
+      margin-bottom: 48px; letter-spacing: 0.02em;
+    }
+    .hero-divider { width: 100%; max-width: 480px; margin-bottom: 48px; }
+    .engagements {
+      display: flex; gap: 32px; flex-wrap: wrap;
+      justify-content: center; max-width: 900px;
+      margin-bottom: 64px;
+    }
+    .engagement { flex: 1 1 220px; max-width: 260px; text-align: center; }
+    .engagement-rule { width: 40px; height: 1px; background: var(--or); margin: 0 auto 16px; }
+    .engagement h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 22px; font-weight: 600;
+      color: var(--creme); margin-bottom: 10px;
+    }
+    .engagement p {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 14px; color: var(--gris); line-height: 1.7;
+    }
+
+    /* ── Citation ── */
+    .citation-section {
+      background: var(--parchemin); padding: 80px 32px; text-align: center;
+    }
+    .citation-divider-top { max-width: 320px; margin: 0 auto 48px; }
+    .citation-divider-bot { max-width: 320px; margin: 0 auto; }
+    blockquote {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(18px, 2.5vw, 26px); font-style: italic;
+      color: var(--sepia); max-width: 720px;
+      margin: 0 auto 24px; line-height: 1.6;
+    }
+
+    /* ── Sections génériques ── */
+    .section-creme { background: var(--creme); padding: 80px 32px; }
+    .section-parchemin { background: var(--parchemin); padding: 80px 32px; }
+    .section-encre { background: var(--encre); padding: 80px 32px; position: relative; }
+    .section-encre-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .container-sm { max-width: 800px; margin: 0 auto; }
+    .section-heading {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(24px, 3vw, 38px); font-weight: 700;
+      color: var(--encre); margin-bottom: 48px;
+    }
+    .section-heading-light {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(24px, 3vw, 38px); font-weight: 700;
+      color: var(--creme); max-width: 600px;
+      margin: 0 auto 20px;
+    }
+    .section-heading-sm {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 32px; font-weight: 700;
+      color: var(--encre); margin-bottom: 24px;
+    }
+
+    /* ── Domaines grid ── */
+    .domaines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 2px;
+    }
+    .domaine-card {
+      background: var(--parchemin); padding: 28px 24px;
+      border-left: 3px solid var(--or);
+      transition: background 0.2s; cursor: default;
+    }
+    .domaine-card:hover { background: #E6D9B8; }
+    .domaine-num {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 10px;
+      font-weight: 600; letter-spacing: 0.18em;
+      color: var(--or); display: block; margin-bottom: 8px;
+    }
+    .domaine-card h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--encre); margin-bottom: 8px;
+    }
+    .domaine-card p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 13px;
+      color: var(--sepia); line-height: 1.65;
+    }
+
+    /* ── Page header (inner pages) ── */
+    .page-header {
+      background: var(--encre); padding: 80px 32px 64px; text-align: center;
+    }
+    .page-header h1 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(28px, 4vw, 52px); font-weight: 700;
+      color: var(--creme); margin-bottom: 16px;
+    }
+    .page-header-divider { max-width: 300px; margin: 0 auto; }
+
+    /* ── Engagements cards ── */
+    .engagements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 32px;
+    }
+    .engagement-card {
+      background: var(--creme); padding: 36px 28px;
+      border-top: 3px solid var(--or);
+    }
+    .engagement-card h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 24px; font-weight: 700;
+      color: var(--encre); margin-bottom: 16px;
+    }
+    .engagement-card p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--sepia); line-height: 1.8;
+    }
+
+    /* ── Domaines list (histoire page) ── */
+    .domaine-row {
+      display: flex; gap: 32px; align-items: flex-start;
+      padding: 28px 0;
+    }
+    .domaine-row + .domaine-row { border-top: 1px solid var(--parchemin); }
+    .domaine-row-num {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 36px; font-weight: 700;
+      color: var(--or); opacity: 0.6;
+      min-width: 60px; line-height: 1; font-style: italic;
+    }
+    .domaine-row h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 20px; font-weight: 600;
+      color: var(--encre); margin-bottom: 8px;
+    }
+    .domaine-row p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--sepia); line-height: 1.75; max-width: 680px;
+    }
+    .histoire-quote {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 18px; font-style: italic;
+      color: var(--gris); border-left: 3px solid var(--or);
+      padding-left: 24px; margin-top: 48px;
+    }
+
+    /* ── Videos page ── */
+    .videos-header {
+      background: var(--encre); padding: 64px 32px 56px; position: relative;
+    }
+    .videos-header-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .videos-header h1 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: clamp(28px, 4vw, 48px); font-weight: 700;
+      color: var(--creme); margin-bottom: 16px; max-width: 640px;
+    }
+    .videos-header p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 15px;
+      color: var(--gris); max-width: 600px; line-height: 1.75; margin-bottom: 32px;
+    }
+    .search-wrap { position: relative; max-width: 480px; }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--or); font-size: 14px; pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(196,154,42,0.4);
+      color: var(--creme);
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      padding: 12px 16px 12px 42px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input::placeholder { color: var(--gris); }
+    .search-input:focus { border-color: var(--or); }
+    .filters-bar {
+      background: var(--parchemin);
+      border-bottom: 1px solid rgba(196,154,42,0.3);
+      padding: 0 32px;
+      position: sticky; top: 68px; z-index: 90;
+    }
+    .filters-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 4px; overflow-x: auto;
+      padding: 12px 0; scrollbar-width: none;
+    }
+    .filters-inner::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      background: transparent; color: var(--sepia);
+      border: 1px solid rgba(196,154,42,0.3);
+      font-family: 'EB Garamond', Garamond, serif; font-size: 12px;
+      padding: 7px 16px; cursor: pointer;
+      white-space: nowrap; letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: var(--encre); color: var(--or);
+      border-color: var(--encre); font-weight: 600;
+    }
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2px;
+    }
+    .videos-count {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 13px;
+      color: var(--gris); margin-bottom: 28px; font-style: italic;
+    }
+    .no-results {
+      text-align: center; padding: 80px 0;
+      font-family: 'EB Garamond', Garamond, serif; font-size: 16px;
+      color: var(--gris); font-style: italic;
+    }
+    /* Video card */
+    .video-card {
+      cursor: pointer; background: var(--parchemin);
+      transition: background 0.25s, transform 0.25s, box-shadow 0.25s;
+    }
+    .video-card:hover {
+      background: #E6D9B8;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(29,43,95,0.12);
+    }
+    .video-thumb {
+      width: 100%; padding-bottom: 56.25%; position: relative;
+      background: var(--encre); overflow: hidden;
+    }
+    .video-thumb-stripe {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, rgba(196,154,42,0.06) 0px, rgba(196,154,42,0.06) 2px, transparent 2px, transparent 12px);
+    }
+    .video-thumb-center {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 8px;
+    }
+    .play-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid var(--or);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .video-card:hover .play-btn { background: rgba(196,154,42,0.13); }
+    .play-triangle {
+      width: 0; height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 16px solid var(--or);
+      margin-left: 4px;
+    }
+    .video-duration {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 11px;
+      color: var(--gris); letter-spacing: 0.05em;
+    }
+    .video-badge {
+      position: absolute; top: 12px; left: 12px;
+      background: rgba(29,43,95,0.8); padding: 4px 10px;
+    }
+    .video-badge span {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 9px;
+      font-weight: 600; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--or);
+    }
+    .video-info { padding: 20px 20px 24px; }
+    .video-info h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--encre); margin-bottom: 8px; line-height: 1.35;
+    }
+    .video-info p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 13px;
+      color: var(--sepia); line-height: 1.65; margin-bottom: 14px;
+    }
+    .video-date {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 11px;
+      color: var(--gris); font-style: italic;
+    }
+    /* Modal */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(29,43,95,0.92);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--encre); max-width: 800px; width: 100%;
+      border: 1px solid rgba(196,154,42,0.25);
+    }
+    .modal-video-area {
+      width: 100%; padding-bottom: 56.25%; position: relative;
+      background: #0D1220;
+    }
+    .modal-video-inner {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(-45deg, rgba(196,154,42,0.04) 0px, rgba(196,154,42,0.04) 2px, transparent 2px, transparent 14px);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 12px;
+    }
+    .modal-video-label {
+      color: var(--or); font-size: 13px;
+      font-family: 'EB Garamond', Garamond, serif; letter-spacing: 0.08em;
+    }
+    .modal-video-sub {
+      color: var(--gris); font-size: 11px;
+      font-family: 'EB Garamond', Garamond, serif; font-style: italic;
+    }
+    .modal-info { padding: 28px 32px 32px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .modal-meta {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--or); display: block; margin-bottom: 8px;
+    }
+    .modal-title {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 24px; font-weight: 700;
+      color: var(--creme); margin-bottom: 12px;
+    }
+    .modal-desc {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--gris); line-height: 1.75;
+    }
+    .modal-close {
+      background: none; border: 1px solid rgba(196,154,42,0.25);
+      color: var(--gris); cursor: pointer;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0; transition: border-color 0.2s, color 0.2s;
+    }
+    .modal-close:hover { border-color: var(--or); color: var(--or); }
+
+    /* ── Équipe ── */
+    .equipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 2px;
+    }
+    .membre-card { background: var(--parchemin); padding: 28px 24px; }
+    .membre-card h3 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--encre); margin-bottom: 8px;
+    }
+    .membre-card p {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 12px;
+      color: var(--gris); font-style: italic;
+    }
+    .presidente-card {
+      background: var(--encre); padding: 48px 40px;
+      border-top: 3px solid var(--or); margin-bottom: 2px;
+    }
+    .presidente-card h2 {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 28px; font-weight: 700;
+      color: var(--creme); margin-bottom: 16px;
+    }
+    .presidente-contacts { display: flex; gap: 32px; flex-wrap: wrap; }
+    .presidente-contacts a {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--gris); text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .presidente-contacts a:hover { color: var(--creme); }
+    .or-icon { color: var(--or); }
+    .equipe-quote {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 18px; font-style: italic; color: var(--gris);
+      border-left: 3px solid var(--or);
+      padding-left: 24px; margin-top: 64px;
+    }
+
+    /* ── Contact ── */
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+    }
+    .contact-links { display: flex; flex-direction: column; gap: 14px; }
+    .contact-link {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'EB Garamond', Garamond, serif; font-size: 15px;
+      color: var(--sepia); text-decoration: none; transition: color 0.2s;
+    }
+    .contact-link:hover { color: var(--rouge); }
+    .contact-or-icon { color: var(--or); font-size: 16px; width: 24px; text-align: center; }
+    .contact-divider { margin: 40px 0; }
+    .form-group { display: flex; flex-direction: column; gap: 16px; }
+    .form-label {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 11px;
+      font-weight: 600; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--or);
+      display: block; margin-bottom: 6px;
+    }
+    .form-input, .form-textarea {
+      width: 100%; background: var(--parchemin);
+      border: 1px solid rgba(196,154,42,0.3);
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--encre); padding: 10px 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--or); }
+    .form-textarea { resize: vertical; }
+    .form-success {
+      background: var(--parchemin); padding: 32px;
+      border-top: 3px solid var(--or); text-align: center;
+      display: none;
+    }
+    .form-success.show { display: block; }
+    .form-success p:first-child {
+      font-family: 'EB Garamond', Garamond, serif;
+      font-size: 18px; font-style: italic; color: var(--sepia);
+    }
+    .form-success p:last-child {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 14px;
+      color: var(--gris); margin-top: 12px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--encre); padding: 48px 32px 32px;
+      border-top: 1px solid rgba(196,154,42,0.12);
+    }
+    .footer-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 48px; margin-bottom: 40px;
+    }
+    .footer-logo {
+      height: 80px; width: 80px; object-fit: contain;
+      border-radius: 50%; background: var(--creme);
+      padding: 4px; margin-bottom: 16px; display: block;
+    }
+    .footer-brand-text {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 13px;
+      color: var(--gris); line-height: 1.7;
+    }
+    .footer-col-label {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 10px;
+      font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--or); margin-bottom: 16px;
+    }
+    .footer-links { display: flex; flex-direction: column; gap: 10px; }
+    .footer-link {
+      background: none; border: none; cursor: pointer;
+      font-family: 'EB Garamond', Garamond, serif; font-size: 13px;
+      color: var(--gris); text-align: left; padding: 0;
+      transition: color 0.2s; text-decoration: none; display: block;
+    }
+    .footer-link:hover { color: var(--creme); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-copy {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 12px; color: var(--gris);
+    }
+    .footer-tagline {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 11px;
+      color: rgba(122,110,95,0.5); font-style: italic;
+    }
+
+    /* ── Body text helpers ── */
+    .body-text {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 16px;
+      color: var(--sepia); line-height: 1.85;
+    }
+    .body-text + .body-text { margin-top: 24px; }
+    .sub-text {
+      font-family: 'EB Garamond', Garamond, serif; font-size: 15px;
+      color: var(--gris); line-height: 1.75;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .domaine-row { flex-direction: column; gap: 8px; }
+      .nav-inner { padding: 0 16px; }
+      .hero { padding: 100px 20px 60px; }
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <button class="nav-brand" onclick="goTo('accueil')">
+      <img src="logo-header.jpg" alt="SHGB" />
+      <span>Société Historique<br>du Grand-Bouctouche</span>
+    </button>
+    <div class="nav-links">
+      <button class="nav-link active" data-page="accueil"  onclick="goTo('accueil')">Accueil</button>
+      <button class="nav-link" data-page="histoire" onclick="goTo('histoire')">Notre histoire</button>
+      <button class="nav-link" data-page="videos"  onclick="goTo('videos')">Vidéos & Entrevues</button>
+      <button class="nav-link" data-page="equipe"  onclick="goTo('equipe')">L'équipe</button>
+      <button class="nav-link" data-page="contact" onclick="goTo('contact')">Contact</button>
+    </div>
+    <button class="nav-hamburger" onclick="toggleMobile()" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-mobile" id="nav-mobile">
+    <button class="nav-mobile-link active" data-page="accueil"  onclick="goTo('accueil')">Accueil</button>
+    <button class="nav-mobile-link" data-page="histoire" onclick="goTo('histoire')">Notre histoire</button>
+    <button class="nav-mobile-link" data-page="videos"  onclick="goTo('videos')">Vidéos & Entrevues</button>
+    <button class="nav-mobile-link" data-page="equipe"  onclick="goTo('equipe')">L'équipe</button>
+    <button class="nav-mobile-link" data-page="contact" onclick="goTo('contact')">Contact</button>
+  </div>
+</nav>
 
-    // ── Design tokens ──────────────────────────────────────────────────────────
-    const T = {
-      creme:     '#F5EFDF',
-      parchemin: '#EDE3C8',
-      encre:     '#1D2B5F',
-      sepia:     '#5C4A32',
-      rouge:     '#981212',
-      or:        '#C49A2A',
-      grisChaud: '#7A6E5F',
-    };
+<!-- ── Page: Accueil ──────────────────────────────────────────────────────── -->
+<div id="page-accueil" class="page active">
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="medallion">
+      <img src="logo-v2.png" alt="Société Historique du Grand-Bouctouche" />
+    </div>
+    <p class="section-label">Grand-Bouctouche · Nouveau-Brunswick</p>
+    <h1>Société Historique<br>du Grand-Bouctouche</h1>
+    <p class="hero-tagline">Nos mémoires sont vivantes. Ce site les porte.</p>
+    <div class="gold-divider hero-divider"><span class="gold-divider-icon">✦</span></div>
+    <div class="engagements">
+      <div class="engagement">
+        <div class="engagement-rule"></div>
+        <h3>Célébrer</h3>
+        <p>Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche.</p>
+      </div>
+      <div class="engagement">
+        <div class="engagement-rule"></div>
+        <h3>Transmettre</h3>
+        <p>Partager cet héritage vivant avec les générations d'aujourd'hui et de demain.</p>
+      </div>
+      <div class="engagement">
+        <div class="engagement-rule"></div>
+        <h3>Rassembler</h3>
+        <p>Unir les citoyens autour d'une mémoire collective partagée.</p>
+      </div>
+    </div>
+    <button class="btn-rouge" onclick="goTo('videos')">Voir nos entrevues</button>
+    <div class="hero-bottom-rule"></div>
+  </section>
 
-    // ── Gold divider ───────────────────────────────────────────────────────────
-    function GoldDivider({ style }) {
-      return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, ...style }}>
-          <div style={{ flex: 1, height: 1, background: T.or, opacity: 0.5 }} />
-          <span style={{ color: T.or, fontSize: 14 }}>✦</span>
-          <div style={{ flex: 1, height: 1, background: T.or, opacity: 0.5 }} />
+  <section class="citation-section">
+    <div class="gold-divider citation-divider-top"><span class="gold-divider-icon">✦</span></div>
+    <blockquote>
+      « Connaître son passé, c'est savoir d'où l'on vient —<br>
+      et se donner les moyens de choisir où l'on va. »
+    </blockquote>
+    <div class="gold-divider citation-divider-bot"><span class="gold-divider-icon">✦</span></div>
+  </section>
+
+  <section class="section-creme">
+    <div class="container">
+      <p class="section-label">Nos domaines</p>
+      <h2 class="section-heading">Huit chapitres de notre histoire</h2>
+      <div class="domaines-grid">
+        <div class="domaine-card"><span class="domaine-num">01</span><h3>Sécurité publique</h3><p>L'ordre public et la garde civile.</p></div>
+        <div class="domaine-card"><span class="domaine-num">02</span><h3>Culture & Arts</h3><p>Théâtre, musique, artisanat et festivités.</p></div>
+        <div class="domaine-card"><span class="domaine-num">03</span><h3>Sports</h3><p>Équipes et moments de fierté collective.</p></div>
+        <div class="domaine-card"><span class="domaine-num">04</span><h3>Éducation</h3><p>Écoles et institutions d'apprentissage.</p></div>
+        <div class="domaine-card"><span class="domaine-num">05</span><h3>Religion</h3><p>La vie paroissiale et les communautés religieuses.</p></div>
+        <div class="domaine-card"><span class="domaine-num">06</span><h3>Pêches</h3><p>La mer, les homardiers et les traditions maritimes.</p></div>
+        <div class="domaine-card"><span class="domaine-num">07</span><h3>Agriculture</h3><p>Les terres cultivées et les familles paysannes.</p></div>
+        <div class="domaine-card"><span class="domaine-num">08</span><h3>Industrie & Commerce</h3><p>Les entrepreneurs et l'économie locale.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-encre" style="text-align:center;">
+    <div class="section-encre-glow"></div>
+    <p class="section-label">Témoignages vivants</p>
+    <h2 class="section-heading-light">Entrevues & récits de notre communauté</h2>
+    <p class="sub-text" style="max-width:560px;margin:0 auto 36px;">
+      Des témoins précieux nous confient leurs récits pour les générations futures.
+      Découvrez nos entrevues vidéo sur la vie et l'histoire du Grand-Bouctouche.
+    </p>
+    <button class="btn-or" onclick="goTo('videos')">Voir toutes les entrevues</button>
+  </section>
+</div>
+
+<!-- ── Page: Notre histoire ───────────────────────────────────────────────── -->
+<div id="page-histoire" class="page" style="padding-top:68px;">
+  <div class="page-header">
+    <p class="section-label">Section 01</p>
+    <h1>Notre histoire & identité</h1>
+    <div class="gold-divider page-header-divider"><span class="gold-divider-icon">✦</span></div>
+  </div>
+
+  <section class="section-creme">
+    <div class="container-sm">
+      <p class="section-label">Mission</p>
+      <h2 class="section-heading-sm">Une organisation née d'un élan du cœur</h2>
+      <p class="body-text">
+        La Société Historique du Grand-Bouctouche est née de l'engagement de citoyennes
+        et citoyens convaincus que leur région mérite d'être racontée, célébrée et transmise.
+        Organisation citoyenne et non commerciale, elle documente l'histoire vivante du
+        Grand-Bouctouche, au Nouveau-Brunswick.
+      </p>
+      <p class="body-text">
+        Chaque témoignage recueilli est une victoire pour notre communauté.
+        Chaque photo partagée, chaque document confié — c'est notre identité collective
+        qui prend forme et qui rayonne.
+      </p>
+    </div>
+  </section>
+
+  <section class="section-parchemin">
+    <div class="container">
+      <p class="section-label">Engagements</p>
+      <h2 class="section-heading-sm">Trois engagements fondamentaux</h2>
+      <div class="engagements-grid">
+        <div class="engagement-card">
+          <h3>Célébrer</h3>
+          <p>Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche, avec fierté et gratitude. Notre région a une histoire riche qui mérite d'être célébrée à sa juste valeur.</p>
         </div>
-      );
-    }
+        <div class="engagement-card">
+          <h3>Transmettre</h3>
+          <p>Partager cet héritage vivant avec les générations d'aujourd'hui et de demain, pour qu'il continue de rayonner. Chaque entrevue, chaque document préservé est un pont entre hier et demain.</p>
+        </div>
+        <div class="engagement-card">
+          <h3>Rassembler</h3>
+          <p>Unir les citoyens autour d'une mémoire collective partagée, source d'appartenance et d'identité commune. La Société est un lieu de rencontre pour tous ceux qui aiment le Grand-Bouctouche.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    // ── Section label ──────────────────────────────────────────────────────────
-    function SectionLabel({ children, light }) {
-      return (
-        <p style={{
-          fontFamily: 'EB Garamond, Garamond, serif',
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: '0.22em',
-          textTransform: 'uppercase',
-          color: T.or,
-          marginBottom: 12,
-        }}>{children}</p>
-      );
-    }
+  <section class="section-creme">
+    <div class="container">
+      <p class="section-label">Domaines couverts</p>
+      <h2 class="section-heading-sm">Huit chapitres de la vie communautaire</h2>
+      <div class="domaine-row"><span class="domaine-row-num">01</span><div><h3>Sécurité publique</h3><p>L'arrivée des premiers policiers, la mise en place de la garde civile et l'histoire de l'ordre public qui a permis à notre communauté de s'épanouir.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">02</span><div><h3>Culture & Arts</h3><p>La vie culturelle bouctouchoise dans toute sa vivacité : théâtre amateur, musique traditionnelle, artisanat et festivités qui font vibrer notre région.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">03</span><div><h3>Sports</h3><p>Les équipes, les champions et les moments de fierté collective qui ont uni les familles du Grand-Bouctouche autour d'une passion commune.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">04</span><div><h3>Éducation</h3><p>Les écoles, les enseignants dévoués et les institutions d'apprentissage qui ont façonné des générations de citoyens engagés.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">05</span><div><h3>Religion</h3><p>La vie paroissiale, les communautés religieuses et le rôle essentiel du clergé dans le tissu social et culturel de notre région.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">06</span><div><h3>Pêches</h3><p>La relation profonde de notre communauté avec la mer : les homardiers, les familles de pêcheurs et les traditions maritimes qui nous définissent.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">07</span><div><h3>Agriculture</h3><p>Les terres cultivées avec passion, les familles paysannes et l'évolution des pratiques agricoles qui ont nourri et bâti notre région.</p></div></div>
+      <div class="domaine-row"><span class="domaine-row-num">08</span><div><h3>Industrie & Commerce</h3><p>Les entrepreneurs d'époque, les premiers commerces et l'économie locale qui ont permis au Grand-Bouctouche de prospérer et de grandir.</p></div></div>
+      <p class="histoire-quote">
+        « Ces huit chapitres ne sont pas des catégories — ce sont des portraits de familles,
+        de voisins, de bâtisseurs. C'est notre histoire. »
+      </p>
+    </div>
+  </section>
+</div>
 
-    // ── Navigation ─────────────────────────────────────────────────────────────
-    function Nav({ page, setPage, scrolled }) {
-      const [mobileOpen, setMobileOpen] = useState(false);
+<!-- ── Page: Vidéos & Entrevues ───────────────────────────────────────────── -->
+<div id="page-videos" class="page" style="padding-top:68px;">
+  <div class="videos-header">
+    <div class="videos-header-glow"></div>
+    <div class="container">
+      <p class="section-label">Archives vivantes</p>
+      <h1>Vidéos & Entrevues</h1>
+      <p>Des témoins précieux nous confient leurs récits pour les générations futures.
+        Chaque entrevue est un trésor de mémoire collective.</p>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" class="search-input" id="video-search"
+          placeholder="Rechercher une entrevue…"
+          oninput="filterVideos()" />
+      </div>
+    </div>
+  </div>
 
-      const navItems = [
-        { id: 'accueil',  label: 'Accueil' },
-        { id: 'histoire', label: 'Notre histoire' },
-        { id: 'videos',   label: 'Vidéos & Entrevues' },
-        { id: 'equipe',   label: "L'équipe" },
-        { id: 'contact',  label: 'Contact' },
-      ];
+  <div class="filters-bar">
+    <div class="filters-inner" id="filters-inner"></div>
+  </div>
 
-      const bg = scrolled ? 'rgba(29,43,95,0.97)' : 'transparent';
+  <section class="section-creme">
+    <div class="container">
+      <p class="videos-count" id="videos-count"></p>
+      <div class="videos-grid" id="videos-grid"></div>
+      <div class="no-results" id="no-results" style="display:none;">Aucune entrevue trouvée.</div>
+    </div>
+  </section>
+</div>
 
-      const handleNav = (id) => {
-        setPage(id);
-        setMobileOpen(false);
-      };
+<!-- ── Page: L'équipe ─────────────────────────────────────────────────────── -->
+<div id="page-equipe" class="page" style="padding-top:68px;">
+  <div class="page-header">
+    <p class="section-label">Section 07</p>
+    <h1>L'équipe fondatrice</h1>
+    <div class="gold-divider page-header-divider"><span class="gold-divider-icon">✦</span></div>
+  </div>
 
-      return (
-        <nav style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-          background: bg,
-          backdropFilter: scrolled ? 'blur(8px)' : 'none',
-          transition: 'background 0.4s ease',
-          borderBottom: scrolled ? '1px solid rgba(196,154,42,0.2)' : 'none',
-        }}>
-          <div style={{
-            maxWidth: 1200, margin: '0 auto',
-            padding: '0 32px',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            height: 68,
-          }}>
-            {/* Brand */}
-            <button onClick={() => handleNav('accueil')} style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: 12,
-            }}>
-              <img src="logo-header.jpg" alt="SHGB" style={{ height: 40, width: 40, objectFit: 'contain' }} />
-              <span style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 13, fontWeight: 600,
-                color: T.creme,
-                letterSpacing: '0.04em', lineHeight: 1.2, textAlign: 'left',
-              }}>Société Historique<br />du Grand-Bouctouche</span>
-            </button>
+  <section class="section-creme">
+    <div class="container" style="max-width:900px;">
+      <p class="body-text" style="margin-bottom:64px;max-width:680px;">
+        La Société Historique du Grand-Bouctouche est née de l'engagement de six
+        citoyennes et citoyens qui ont répondu à l'appel avec conviction. Ce sont
+        eux qui ont posé la première pierre de cet édifice mémoriel.
+      </p>
 
-            {/* Desktop links */}
-            <div className="nav-desktop" style={{ display: 'flex', gap: 4 }}>
-              {navItems.map(item => (
-                <button key={item.id} onClick={() => handleNav(item.id)} style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: 'EB Garamond, Garamond, serif',
-                  fontSize: 13,
-                  fontWeight: page === item.id ? 600 : 400,
-                  color: page === item.id ? T.or : T.creme,
-                  padding: '6px 14px', borderRadius: 4,
-                  transition: 'color 0.2s',
-                  letterSpacing: '0.02em',
-                }}>
-                  {item.label}
-                  {page === item.id && (
-                    <div style={{ height: 1, background: T.or, marginTop: 3, borderRadius: 1 }} />
-                  )}
-                </button>
-              ))}
-            </div>
+      <div class="presidente-card">
+        <p class="section-label">Présidente fondatrice</p>
+        <h2>Pauline Bastarache</h2>
+        <div class="presidente-contacts">
+          <a href="tel:5067438517"><span class="or-icon">☎</span> 506-743-8517</a>
+          <a href="tel:5069552676"><span class="or-icon">☎</span> 506-955-2676</a>
+          <a href="mailto:paulinebast@hotmail.com"><span class="or-icon">✉</span> paulinebast@hotmail.com</a>
+        </div>
+      </div>
 
-            {/* Mobile hamburger */}
-            <button
-              className="nav-mobile-btn"
-              onClick={() => setMobileOpen(o => !o)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: T.creme, fontSize: 22, padding: 8,
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              {mobileOpen ? '✕' : '☰'}
-            </button>
-          </div>
+      <div class="equipe-grid" style="margin-bottom:64px;">
+        <div class="membre-card"><h3>Achille Bastarache</h3><p>Membre fondateur</p></div>
+        <div class="membre-card"><h3>Jean Bastarache</h3><p>Membre fondateur</p></div>
+        <div class="membre-card"><h3>Pierre Cormier</h3><p>Membre fondateur</p></div>
+        <div class="membre-card"><h3>Jean-Paul LeBlanc</h3><p>Membre fondateur</p></div>
+        <div class="membre-card"><h3>Clétus Maillet</h3><p>Membre fondateur · Conseiller municipal</p></div>
+      </div>
 
-          {/* Mobile menu */}
-          {mobileOpen && (
-            <div className="mobile-menu" style={{
-              background: 'rgba(29,43,95,0.98)',
-              borderTop: '1px solid rgba(196,154,42,0.2)',
-              padding: '16px 32px 24px',
-            }}>
-              {navItems.map(item => (
-                <button key={item.id} onClick={() => handleNav(item.id)} style={{
-                  display: 'block', width: '100%', textAlign: 'left',
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: 'EB Garamond, Garamond, serif',
-                  fontSize: 16,
-                  fontWeight: page === item.id ? 600 : 400,
-                  color: page === item.id ? T.or : T.creme,
-                  padding: '12px 0',
-                  borderBottom: '1px solid rgba(196,154,42,0.1)',
-                  letterSpacing: '0.02em',
-                }}>
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </nav>
-      );
-    }
+      <p class="section-label">Membres</p>
+      <h2 style="font-family:'EB Garamond',Garamond,serif;font-size:28px;font-weight:700;color:var(--encre);margin-bottom:24px;">Nos membres</h2>
+      <p class="sub-text" style="margin-bottom:32px;max-width:680px;">
+        La Société rassemble des citoyennes et citoyens engagés qui contribuent,
+        chacun à leur façon, à documenter et célébrer notre mémoire collective.
+      </p>
+      <div class="equipe-grid">
+        <div class="membre-card"><h3>John LeRoux</h3><p>Membre</p></div>
+        <div class="membre-card"><h3>Louise Richard</h3><p>Membre</p></div>
+      </div>
 
-    // ── Page: Accueil ──────────────────────────────────────────────────────────
-    function PageAccueil({ setPage }) {
-      return (
+      <p class="equipe-quote">
+        « Notre mémoire est un trésor vivant. Chaque geste posé en son nom la rend plus lumineuse. »
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ── Page: Contact ──────────────────────────────────────────────────────── -->
+<div id="page-contact" class="page" style="padding-top:68px;">
+  <div class="page-header">
+    <p class="section-label">Rejoignez-nous</p>
+    <h1>Contact</h1>
+    <div class="gold-divider page-header-divider"><span class="gold-divider-icon">✦</span></div>
+  </div>
+
+  <section class="section-creme">
+    <div class="container" style="max-width:900px;">
+      <div class="contact-grid">
         <div>
-          {/* Hero */}
-          <section style={{
-            minHeight: '100vh',
-            background: T.encre,
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            padding: '120px 32px 80px',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {/* Radial glow */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,154,42,0.07) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }} />
-
-            {/* Logo medallion */}
-            <div style={{
-              width: 200, height: 200, borderRadius: '50%',
-              border: `2px solid ${T.or}`,
-              padding: 6, marginBottom: 40,
-              boxShadow: `0 0 0 1px ${T.or}40, 0 8px 40px rgba(0,0,0,0.4)`,
-              background: T.creme,
-              overflow: 'hidden',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <img
-                src="logo-v2.png"
-                alt="Société Historique du Grand-Bouctouche"
-                style={{ width: '90%', height: '90%', objectFit: 'contain' }}
-              />
-            </div>
-
-            <SectionLabel light>Grand-Bouctouche · Nouveau-Brunswick</SectionLabel>
-
-            <h1 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(28px, 4vw, 48px)',
-              fontWeight: 700, color: T.creme,
-              textAlign: 'center', lineHeight: 1.2,
-              marginBottom: 20, maxWidth: 700,
-            }}>
-              Société Historique<br />du Grand-Bouctouche
-            </h1>
-
-            <p style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 16, fontStyle: 'italic',
-              color: T.or, textAlign: 'center',
-              marginBottom: 48, letterSpacing: '0.02em',
-            }}>
-              Nos mémoires sont vivantes. Ce site les porte.
-            </p>
-
-            <GoldDivider style={{ width: '100%', maxWidth: 480, marginBottom: 48 }} />
-
-            {/* 3 engagements */}
-            <div style={{
-              display: 'flex', gap: 32, flexWrap: 'wrap',
-              justifyContent: 'center', maxWidth: 900,
-              marginBottom: 64,
-            }}>
-              {[
-                { titre: 'Célébrer', texte: "Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche." },
-                { titre: 'Transmettre', texte: "Partager cet héritage vivant avec les générations d'aujourd'hui et de demain." },
-                { titre: 'Rassembler', texte: "Unir les citoyens autour d'une mémoire collective partagée." },
-              ].map(e => (
-                <div key={e.titre} style={{ flex: '1 1 220px', maxWidth: 260, textAlign: 'center' }}>
-                  <div style={{ width: 40, height: 1, background: T.or, margin: '0 auto 16px' }} />
-                  <h3 style={{
-                    fontFamily: 'EB Garamond, Garamond, serif',
-                    fontSize: 22, fontWeight: 600, color: T.creme, marginBottom: 10,
-                  }}>{e.titre}</h3>
-                  <p style={{
-                    fontFamily: 'EB Garamond, Garamond, serif',
-                    fontSize: 14, color: T.grisChaud, lineHeight: 1.7,
-                  }}>{e.texte}</p>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setPage('videos')}
-              style={{
-                background: T.rouge, color: T.creme, border: 'none',
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 13, fontWeight: 600,
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                padding: '14px 36px', cursor: 'pointer',
-                transition: 'background 0.2s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#7A2E12'}
-              onMouseLeave={e => e.currentTarget.style.background = T.rouge}
-            >
-              Voir nos entrevues
-            </button>
-
-            {/* Bottom rule */}
-            <div style={{
-              position: 'absolute', bottom: 32, left: 64, right: 64,
-              height: 1, background: `linear-gradient(to right, transparent, ${T.or}60, transparent)`,
-            }} />
-          </section>
-
-          {/* Citation */}
-          <section style={{ background: T.parchemin, padding: '80px 32px', textAlign: 'center' }}>
-            <GoldDivider style={{ maxWidth: 320, margin: '0 auto 48px' }} />
-            <blockquote style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(18px, 2.5vw, 26px)',
-              fontStyle: 'italic', color: T.sepia,
-              maxWidth: 720, margin: '0 auto 24px', lineHeight: 1.6,
-            }}>
-              « Connaître son passé, c'est savoir d'où l'on vient —<br />
-              et se donner les moyens de choisir où l'on va. »
-            </blockquote>
-            <GoldDivider style={{ maxWidth: 320, margin: '0 auto' }} />
-          </section>
-
-          {/* Domaines */}
-          <section style={{ background: T.creme, padding: '80px 32px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <SectionLabel>Nos domaines</SectionLabel>
-              <h2 style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 'clamp(24px, 3vw, 38px)',
-                fontWeight: 700, color: T.encre, marginBottom: 48,
-              }}>Huit chapitres de notre histoire</h2>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                gap: 2,
-              }}>
-                {[
-                  { num: '01', titre: 'Sécurité publique', desc: "L'ordre public et la garde civile." },
-                  { num: '02', titre: 'Culture & Arts', desc: 'Théâtre, musique, artisanat et festivités.' },
-                  { num: '03', titre: 'Sports', desc: 'Équipes et moments de fierté collective.' },
-                  { num: '04', titre: 'Éducation', desc: "Écoles et institutions d'apprentissage." },
-                  { num: '05', titre: 'Religion', desc: 'La vie paroissiale et les communautés religieuses.' },
-                  { num: '06', titre: 'Pêches', desc: 'La mer, les homardiers et les traditions maritimes.' },
-                  { num: '07', titre: 'Agriculture', desc: 'Les terres cultivées et les familles paysannes.' },
-                  { num: '08', titre: 'Industrie & Commerce', desc: "Les entrepreneurs et l'économie locale." },
-                ].map(d => (
-                  <div
-                    key={d.num}
-                    style={{
-                      background: T.parchemin, padding: '28px 24px',
-                      borderLeft: `3px solid ${T.or}`,
-                      transition: 'background 0.2s',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#E6D9B8'}
-                    onMouseLeave={e => e.currentTarget.style.background = T.parchemin}
-                  >
-                    <span style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
-                      fontWeight: 600, letterSpacing: '0.18em',
-                      color: T.or, display: 'block', marginBottom: 8,
-                    }}>{d.num}</span>
-                    <h3 style={{
-                      fontFamily: 'EB Garamond, Garamond, serif',
-                      fontSize: 17, fontWeight: 600,
-                      color: T.encre, marginBottom: 8,
-                    }}>{d.titre}</h3>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                      color: T.sepia, lineHeight: 1.65,
-                    }}>{d.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* CTA vidéos */}
-          <section style={{
-            background: T.encre, padding: '80px 32px',
-            textAlign: 'center', position: 'relative',
-          }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'radial-gradient(ellipse 60% 60% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }} />
-            <SectionLabel light>Témoignages vivants</SectionLabel>
-            <h2 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(24px, 3vw, 38px)',
-              fontWeight: 700, color: T.creme,
-              maxWidth: 600, margin: '0 auto 20px',
-            }}>Entrevues & récits de notre communauté</h2>
-            <p style={{
-              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
-              color: T.grisChaud, maxWidth: 560,
-              margin: '0 auto 36px', lineHeight: 1.75,
-            }}>
-              Des témoins précieux nous confient leurs récits pour les générations futures.
-              Découvrez nos entrevues vidéo sur la vie et l'histoire du Grand-Bouctouche.
-            </p>
-            <button
-              onClick={() => setPage('videos')}
-              style={{
-                background: 'transparent', color: T.or,
-                border: `1px solid ${T.or}`,
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 13, fontWeight: 600,
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                padding: '13px 36px', cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = T.or; e.currentTarget.style.color = T.encre; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = T.or; }}
-            >
-              Voir toutes les entrevues
-            </button>
-          </section>
-        </div>
-      );
-    }
-
-    // ── Page: Notre histoire ───────────────────────────────────────────────────
-    function PageHistoire() {
-      return (
-        <div style={{ paddingTop: 68 }}>
-          <section style={{ background: T.encre, padding: '80px 32px 64px', textAlign: 'center' }}>
-            <SectionLabel light>Section 01</SectionLabel>
-            <h1 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(28px, 4vw, 52px)',
-              fontWeight: 700, color: T.creme, marginBottom: 16,
-            }}>Notre histoire & identité</h1>
-            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
-          </section>
-
-          <section style={{ background: T.creme, padding: '80px 32px' }}>
-            <div style={{ maxWidth: 800, margin: '0 auto' }}>
-              <SectionLabel>Mission</SectionLabel>
-              <h2 style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 24,
-              }}>Une organisation née d'un élan du cœur</h2>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16,
-                color: T.sepia, lineHeight: 1.85, marginBottom: 24,
-              }}>
-                La Société Historique du Grand-Bouctouche est née de l'engagement de citoyennes
-                et citoyens convaincus que leur région mérite d'être racontée, célébrée et transmise.
-                Organisation citoyenne et non commerciale, elle documente l'histoire vivante du
-                Grand-Bouctouche, au Nouveau-Brunswick.
-              </p>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16,
-                color: T.sepia, lineHeight: 1.85,
-              }}>
-                Chaque témoignage recueilli est une victoire pour notre communauté.
-                Chaque photo partagée, chaque document confié — c'est notre identité collective
-                qui prend forme et qui rayonne.
-              </p>
-            </div>
-          </section>
-
-          <section style={{ background: T.parchemin, padding: '80px 32px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <SectionLabel>Engagements</SectionLabel>
-              <h2 style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 48,
-              }}>Trois engagements fondamentaux</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 32 }}>
-                {[
-                  {
-                    titre: 'Célébrer',
-                    texte: "Honorer les personnes, les lieux et les récits qui ont bâti le Grand-Bouctouche, avec fierté et gratitude. Notre région a une histoire riche qui mérite d'être célébrée à sa juste valeur.",
-                  },
-                  {
-                    titre: 'Transmettre',
-                    texte: "Partager cet héritage vivant avec les générations d'aujourd'hui et de demain, pour qu'il continue de rayonner. Chaque entrevue, chaque document préservé est un pont entre hier et demain.",
-                  },
-                  {
-                    titre: 'Rassembler',
-                    texte: "Unir les citoyens autour d'une mémoire collective partagée, source d'appartenance et d'identité commune. La Société est un lieu de rencontre pour tous ceux qui aiment le Grand-Bouctouche.",
-                  },
-                ].map(e => (
-                  <div key={e.titre} style={{
-                    background: T.creme, padding: '36px 28px',
-                    borderTop: `3px solid ${T.or}`,
-                  }}>
-                    <h3 style={{
-                      fontFamily: 'EB Garamond, Garamond, serif',
-                      fontSize: 24, fontWeight: 700, color: T.encre, marginBottom: 16,
-                    }}>{e.titre}</h3>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                      color: T.sepia, lineHeight: 1.8,
-                    }}>{e.texte}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section style={{ background: T.creme, padding: '80px 32px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <SectionLabel>Domaines couverts</SectionLabel>
-              <h2 style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 32, fontWeight: 700, color: T.encre, marginBottom: 48,
-              }}>Huit chapitres de la vie communautaire</h2>
-
-              {[
-                { num: '01', titre: 'Sécurité publique', desc: "L'arrivée des premiers policiers, la mise en place de la garde civile et l'histoire de l'ordre public qui a permis à notre communauté de s'épanouir." },
-                { num: '02', titre: 'Culture & Arts', desc: 'La vie culturelle bouctouchoise dans toute sa vivacité : théâtre amateur, musique traditionnelle, artisanat et festivités qui font vibrer notre région.' },
-                { num: '03', titre: 'Sports', desc: "Les équipes, les champions et les moments de fierté collective qui ont uni les familles du Grand-Bouctouche autour d'une passion commune." },
-                { num: '04', titre: 'Éducation', desc: 'Les écoles, les enseignants dévoués et les institutions d'apprentissage qui ont façonné des générations de citoyens engagés.' },
-                { num: '05', titre: 'Religion', desc: 'La vie paroissiale, les communautés religieuses et le rôle essentiel du clergé dans le tissu social et culturel de notre région.' },
-                { num: '06', titre: 'Pêches', desc: 'La relation profonde de notre communauté avec la mer : les homardiers, les familles de pêcheurs et les traditions maritimes qui nous définissent.' },
-                { num: '07', titre: 'Agriculture', desc: 'Les terres cultivées avec passion, les familles paysannes et l'évolution des pratiques agricoles qui ont nourri et bâti notre région.' },
-                { num: '08', titre: 'Industrie & Commerce', desc: "Les entrepreneurs d'époque, les premiers commerces et l'économie locale qui ont permis au Grand-Bouctouche de prospérer et de grandir." },
-              ].map((d, i) => (
-                <div key={d.num} style={{
-                  display: 'flex', gap: 32, alignItems: 'flex-start',
-                  padding: '28px 0',
-                  borderBottom: i < 7 ? `1px solid ${T.parchemin}` : 'none',
-                }}>
-                  <span style={{
-                    fontFamily: 'EB Garamond, Garamond, serif',
-                    fontSize: 36, fontWeight: 700, color: T.or, opacity: 0.6,
-                    minWidth: 60, lineHeight: 1, fontStyle: 'italic',
-                  }}>{d.num}</span>
-                  <div>
-                    <h3 style={{
-                      fontFamily: 'EB Garamond, Garamond, serif',
-                      fontSize: 20, fontWeight: 600, color: T.encre, marginBottom: 8,
-                    }}>{d.titre}</h3>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                      color: T.sepia, lineHeight: 1.75, maxWidth: 680,
-                    }}>{d.desc}</p>
-                  </div>
-                </div>
-              ))}
-
-              <blockquote style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 18, fontStyle: 'italic',
-                color: T.grisChaud, borderLeft: `3px solid ${T.or}`,
-                paddingLeft: 24, marginTop: 48,
-              }}>
-                « Ces huit chapitres ne sont pas des catégories — ce sont des portraits de familles,
-                de voisins, de bâtisseurs. C'est notre histoire. »
-              </blockquote>
-            </div>
-          </section>
-        </div>
-      );
-    }
-
-    // ── Videos page ────────────────────────────────────────────────────────────
-    const CATEGORIES = ['Toutes', 'Sécurité publique', 'Culture & Arts', 'Sports', 'Éducation', 'Religion', 'Pêches', 'Agriculture', 'Industrie & Commerce'];
-
-    const VIDEOS = [
-      { id: 1, titre: 'Les débuts de la garde civile', desc: 'Témoignage de Robert Landry sur les premiers corps policiers de la région.', categorie: 'Sécurité publique', duree: '12:34', date: '2024' },
-      { id: 2, titre: 'La musique traditionnelle acadienne', desc: "Entrevue avec Marie-Anne Thibodeau, musicienne et dépositaire du répertoire local.", categorie: 'Culture & Arts', duree: '18:22', date: '2024' },
-      { id: 3, titre: 'Le hockey au Grand-Bouctouche', desc: 'Souvenirs de la ligue locale et des équipes qui ont marqué les années 1960–1980.', categorie: 'Sports', duree: '24:10', date: '2024' },
-      { id: 4, titre: "L'école Saint-Jean-Baptiste", desc: "Récits d'anciens élèves et d'enseignants sur l'éducation française en Acadie.", categorie: 'Éducation', duree: '21:45', date: '2025' },
-      { id: 5, titre: 'La paroisse Sainte-Cécile', desc: "L'histoire de notre paroisse racontée par l'abbé Cormier et des paroissiens de longue date.", categorie: 'Religion', duree: '16:08', date: '2025' },
-      { id: 6, titre: 'La vie des homardiers', desc: 'Les pêcheurs du Grand-Bouctouche racontent leurs saisons en mer et les traditions transmises.', categorie: 'Pêches', duree: '28:55', date: '2025' },
-      { id: 7, titre: "Les fermes d'antan", desc: 'Témoignages sur la vie agricole avant la mécanisation et les transformations du XXe siècle.', categorie: 'Agriculture', duree: '19:30', date: '2025' },
-      { id: 8, titre: 'Les premiers commerces', desc: 'Entrevue avec les descendants des familles fondatrices du commerce local.', categorie: 'Industrie & Commerce', duree: '14:17', date: '2024' },
-      { id: 9, titre: 'Chants de mer et berceuses', desc: "Collection de chants traditionnels recueillis auprès des aînés de la région.", categorie: 'Culture & Arts', duree: '32:00', date: '2025' },
-    ];
-
-    function VideoCard({ video, onClick }) {
-      const [hovered, setHovered] = useState(false);
-      return (
-        <div
-          onClick={() => onClick(video)}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          style={{
-            cursor: 'pointer',
-            background: hovered ? '#E6D9B8' : T.parchemin,
-            transition: 'background 0.25s, transform 0.25s, box-shadow 0.25s',
-            transform: hovered ? 'translateY(-4px)' : 'none',
-            boxShadow: hovered ? '0 8px 32px rgba(29,43,95,0.12)' : 'none',
-          }}
-        >
-          {/* Thumbnail */}
-          <div style={{
-            width: '100%', paddingBottom: '56.25%',
-            position: 'relative', background: T.encre, overflow: 'hidden',
-          }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'repeating-linear-gradient(-45deg, rgba(196,154,42,0.06) 0px, rgba(196,154,42,0.06) 2px, transparent 2px, transparent 12px)',
-            }} />
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexDirection: 'column', gap: 8,
-            }}>
-              <div style={{
-                width: 52, height: 52, borderRadius: '50%',
-                border: `2px solid ${T.or}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: hovered ? `${T.or}22` : 'transparent',
-                transition: 'background 0.2s',
-              }}>
-                <div style={{
-                  width: 0, height: 0,
-                  borderTop: '10px solid transparent',
-                  borderBottom: '10px solid transparent',
-                  borderLeft: `16px solid ${T.or}`,
-                  marginLeft: 4,
-                }} />
-              </div>
-              <span style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
-                color: T.grisChaud, letterSpacing: '0.05em',
-              }}>{video.duree}</span>
-            </div>
-            <div style={{
-              position: 'absolute', top: 12, left: 12,
-              background: `${T.encre}CC`, padding: '4px 10px',
-            }}>
-              <span style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 9,
-                fontWeight: 600, letterSpacing: '0.15em',
-                textTransform: 'uppercase', color: T.or,
-              }}>{video.categorie}</span>
-            </div>
+          <p class="section-label">Coordonnées</p>
+          <h2 style="font-family:'EB Garamond',Garamond,serif;font-size:26px;font-weight:700;color:var(--encre);margin-bottom:24px;">Pauline Bastarache</h2>
+          <p class="body-text" style="font-size:14px;font-style:italic;margin-bottom:24px;">
+            Présidente fondatrice<br>Société Historique du Grand-Bouctouche
+          </p>
+          <div class="contact-links">
+            <a href="tel:5067438517" class="contact-link"><span class="contact-or-icon">☎</span> 506-743-8517</a>
+            <a href="tel:5069552676" class="contact-link"><span class="contact-or-icon">☎</span> 506-955-2676</a>
+            <a href="mailto:paulinebast@hotmail.com" class="contact-link"><span class="contact-or-icon">✉</span> paulinebast@hotmail.com</a>
           </div>
-
-          <div style={{ padding: '20px 20px 24px' }}>
-            <h3 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 17, fontWeight: 600,
-              color: T.encre, marginBottom: 8, lineHeight: 1.35,
-            }}>{video.titre}</h3>
-            <p style={{
-              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-              color: T.sepia, lineHeight: 1.65, marginBottom: 14,
-            }}>{video.desc}</p>
-            <span style={{
-              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
-              color: T.grisChaud, fontStyle: 'italic',
-            }}>{video.date}</span>
-          </div>
+          <div class="gold-divider contact-divider"><span class="gold-divider-icon">✦</span></div>
+          <p style="font-family:'EB Garamond',Garamond,serif;font-size:14px;color:var(--gris);line-height:1.8;">
+            Grand-Bouctouche, Nouveau-Brunswick, Canada
+          </p>
         </div>
-      );
-    }
 
-    function VideoModal({ video, onClose }) {
-      useEffect(() => {
-        const handler = (e) => { if (e.key === 'Escape') onClose(); };
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
-      }, [onClose]);
-
-      return (
-        <div
-          style={{
-            position: 'fixed', inset: 0, zIndex: 200,
-            background: 'rgba(29,43,95,0.92)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: 24,
-          }}
-          onClick={onClose}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              background: T.encre, maxWidth: 800, width: '100%',
-              border: `1px solid ${T.or}40`,
-            }}
-          >
-            {/* Video area */}
-            <div style={{
-              width: '100%', paddingBottom: '56.25%', position: 'relative',
-              background: '#0D1220',
-            }}>
-              <div style={{
-                position: 'absolute', inset: 0,
-                backgroundImage: 'repeating-linear-gradient(-45deg, rgba(196,154,42,0.04) 0px, rgba(196,154,42,0.04) 2px, transparent 2px, transparent 14px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexDirection: 'column', gap: 12,
-              }}>
-                <div style={{
-                  color: T.or, fontSize: 13,
-                  fontFamily: 'EB Garamond, Garamond, serif', letterSpacing: '0.08em',
-                }}>
-                  ▶ Emplacement vidéo — {video.titre}
-                </div>
-                <div style={{
-                  color: T.grisChaud, fontSize: 11,
-                  fontFamily: 'EB Garamond, Garamond, serif', fontStyle: 'italic',
-                }}>
-                  Insérez l'URL YouTube ou Vimeo ici
-                </div>
-              </div>
-            </div>
-
-            <div style={{ padding: '28px 32px 32px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-                <div>
-                  <span style={{
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 9, fontWeight: 600,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    color: T.or, display: 'block', marginBottom: 8,
-                  }}>{video.categorie} · {video.duree} · {video.date}</span>
-                  <h2 style={{
-                    fontFamily: 'EB Garamond, Garamond, serif',
-                    fontSize: 24, fontWeight: 700, color: T.creme, marginBottom: 12,
-                  }}>{video.titre}</h2>
-                  <p style={{
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                    color: T.grisChaud, lineHeight: 1.75,
-                  }}>{video.desc}</p>
-                </div>
-                <button
-                  onClick={onClose}
-                  style={{
-                    background: 'none', border: `1px solid ${T.or}40`,
-                    color: T.grisChaud, cursor: 'pointer',
-                    width: 36, height: 36, display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, flexShrink: 0, transition: 'border-color 0.2s, color 0.2s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = T.or; e.currentTarget.style.color = T.or; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = `${T.or}40`; e.currentTarget.style.color = T.grisChaud; }}
-                >✕</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function PageVideos() {
-      const [categorie, setCategorie] = useState('Toutes');
-      const [selected, setSelected] = useState(null);
-      const [search, setSearch] = useState('');
-
-      const filtered = VIDEOS.filter(v => {
-        const matchCat = categorie === 'Toutes' || v.categorie === categorie;
-        const q = search.toLowerCase();
-        const matchSearch = q === '' ||
-          v.titre.toLowerCase().includes(q) ||
-          v.desc.toLowerCase().includes(q);
-        return matchCat && matchSearch;
-      });
-
-      return (
-        <div style={{ paddingTop: 68 }}>
-          <section style={{
-            background: T.encre, padding: '64px 32px 56px', position: 'relative',
-          }}>
-            <div style={{
-              position: 'absolute', inset: 0,
-              backgroundImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(196,154,42,0.06) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }} />
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              <SectionLabel light>Archives vivantes</SectionLabel>
-              <h1 style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 'clamp(28px, 4vw, 48px)',
-                fontWeight: 700, color: T.creme, marginBottom: 16, maxWidth: 640,
-              }}>Vidéos & Entrevues</h1>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
-                color: T.grisChaud, maxWidth: 600, lineHeight: 1.75, marginBottom: 32,
-              }}>
-                Des témoins précieux nous confient leurs récits pour les générations futures.
-                Chaque entrevue est un trésor de mémoire collective.
-              </p>
-
-              {/* Search */}
-              <div style={{ position: 'relative', maxWidth: 480 }}>
-                <input
-                  type="text"
-                  placeholder="Rechercher une entrevue…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  style={{
-                    width: '100%',
-                    background: 'rgba(255,255,255,0.07)',
-                    border: `1px solid ${T.or}40`,
-                    color: T.creme,
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                    padding: '12px 16px 12px 42px',
-                    outline: 'none', transition: 'border-color 0.2s',
-                  }}
-                  onFocus={e => e.target.style.borderColor = T.or}
-                  onBlur={e => e.target.style.borderColor = `${T.or}40`}
-                />
-                <span style={{
-                  position: 'absolute', left: 14, top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: T.or, fontSize: 14, pointerEvents: 'none',
-                }}>⌕</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Category filters */}
-          <div style={{
-            background: T.parchemin, borderBottom: `1px solid ${T.or}30`,
-            padding: '0 32px',
-            position: 'sticky', top: 68, zIndex: 90,
-          }}>
-            <div
-              className="filter-scroll"
-              style={{
-                maxWidth: 1100, margin: '0 auto',
-                display: 'flex', gap: 4, overflowX: 'auto',
-                padding: '12px 0',
-              }}
-            >
-              {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setCategorie(cat)} style={{
-                  background: categorie === cat ? T.encre : 'transparent',
-                  color: categorie === cat ? T.or : T.sepia,
-                  border: categorie === cat ? 'none' : `1px solid ${T.or}30`,
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
-                  fontWeight: categorie === cat ? 600 : 400,
-                  padding: '7px 16px', cursor: 'pointer',
-                  whiteSpace: 'nowrap', letterSpacing: '0.04em',
-                  transition: 'all 0.2s',
-                }}>{cat}</button>
-              ))}
-            </div>
-          </div>
-
-          {/* Video grid */}
-          <section style={{ background: T.creme, padding: '48px 32px 80px' }}>
-            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-              {filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '80px 0' }}>
-                  <p style={{
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16,
-                    color: T.grisChaud, fontStyle: 'italic',
-                  }}>Aucune entrevue trouvée.</p>
-                </div>
-              ) : (
-                <>
-                  <p style={{
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                    color: T.grisChaud, marginBottom: 28, fontStyle: 'italic',
-                  }}>
-                    {filtered.length} entrevue{filtered.length > 1 ? 's' : ''}{categorie !== 'Toutes' ? ` — ${categorie}` : ''}
-                  </p>
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                    gap: 2,
-                  }}>
-                    {filtered.map(v => (
-                      <VideoCard key={v.id} video={v} onClick={setSelected} />
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          </section>
-
-          {selected && <VideoModal video={selected} onClose={() => setSelected(null)} />}
-        </div>
-      );
-    }
-
-    // ── Page: L'équipe ─────────────────────────────────────────────────────────
-    function PageEquipe() {
-      return (
-        <div style={{ paddingTop: 68 }}>
-          <section style={{
-            background: T.encre, padding: '64px 32px 56px', textAlign: 'center',
-          }}>
-            <SectionLabel light>Section 07</SectionLabel>
-            <h1 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(28px, 4vw, 48px)',
-              fontWeight: 700, color: T.creme, marginBottom: 16,
-            }}>L'équipe fondatrice</h1>
-            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
-          </section>
-
-          <section style={{ background: T.creme, padding: '80px 32px' }}>
-            <div style={{ maxWidth: 900, margin: '0 auto' }}>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 16,
-                color: T.sepia, lineHeight: 1.85, marginBottom: 64, maxWidth: 680,
-              }}>
-                La Société Historique du Grand-Bouctouche est née de l'engagement de six
-                citoyennes et citoyens qui ont répondu à l'appel avec conviction. Ce sont
-                eux qui ont posé la première pierre de cet édifice mémoriel.
-              </p>
-
-              {/* Présidente */}
-              <div style={{ marginBottom: 2 }}>
-                <div style={{
-                  background: T.encre, padding: '48px 40px',
-                  borderTop: `3px solid ${T.or}`,
-                }}>
-                  <SectionLabel light>Présidente fondatrice</SectionLabel>
-                  <h2 style={{
-                    fontFamily: 'EB Garamond, Garamond, serif',
-                    fontSize: 28, fontWeight: 700, color: T.creme, marginBottom: 16,
-                  }}>Pauline Bastarache</h2>
-                  <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-                    {[
-                      { href: 'tel:5067438517', label: '506-743-8517', icon: '☎' },
-                      { href: 'tel:5069552676', label: '506-955-2676', icon: '☎' },
-                      { href: 'mailto:paulinebast@hotmail.com', label: 'paulinebast@hotmail.com', icon: '✉' },
-                    ].map(c => (
-                      <a key={c.href} href={c.href} style={{
-                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                        color: T.grisChaud, textDecoration: 'none',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}>
-                        <span style={{ color: T.or }}>{c.icon}</span> {c.label}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Membres fondateurs */}
-              <div className="equipe-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                gap: 2, marginBottom: 64,
-              }}>
-                {[
-                  { nom: 'Achille Bastarache', role: 'Membre fondateur' },
-                  { nom: 'Jean Bastarache', role: 'Membre fondateur' },
-                  { nom: 'Pierre Cormier', role: 'Membre fondateur' },
-                  { nom: 'Jean-Paul LeBlanc', role: 'Membre fondateur' },
-                  { nom: 'Clétus Maillet', role: 'Membre fondateur · Conseiller municipal' },
-                ].map(m => (
-                  <div key={m.nom} style={{ background: T.parchemin, padding: '28px 24px' }}>
-                    <h3 style={{
-                      fontFamily: 'EB Garamond, Garamond, serif',
-                      fontSize: 17, fontWeight: 600, color: T.encre, marginBottom: 8,
-                    }}>{m.nom}</h3>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
-                      color: T.grisChaud, fontStyle: 'italic',
-                    }}>{m.role}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Membres */}
-              <div>
-                <SectionLabel>Membres</SectionLabel>
-                <h2 style={{
-                  fontFamily: 'EB Garamond, Garamond, serif',
-                  fontSize: 28, fontWeight: 700, color: T.encre, marginBottom: 24,
-                }}>Nos membres</h2>
-                <p style={{
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
-                  color: T.sepia, lineHeight: 1.85, marginBottom: 32, maxWidth: 680,
-                }}>
-                  La Société rassemble des citoyennes et citoyens engagés qui contribuent,
-                  chacun à leur façon, à documenter et célébrer notre mémoire collective.
-                </p>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                  gap: 2,
-                }}>
-                  {[
-                    { nom: 'John LeRoux', role: 'Membre' },
-                    { nom: 'Louise Richard', role: 'Membre' },
-                  ].map(m => (
-                    <div key={m.nom} style={{ background: T.parchemin, padding: '28px 24px' }}>
-                      <h3 style={{
-                        fontFamily: 'EB Garamond, Garamond, serif',
-                        fontSize: 17, fontWeight: 600, color: T.encre, marginBottom: 8,
-                      }}>{m.nom}</h3>
-                      <p style={{
-                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12,
-                        color: T.grisChaud, fontStyle: 'italic',
-                      }}>{m.role}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <blockquote style={{
-                fontFamily: 'EB Garamond, Garamond, serif',
-                fontSize: 18, fontStyle: 'italic', color: T.grisChaud,
-                borderLeft: `3px solid ${T.or}`,
-                paddingLeft: 24, marginTop: 64,
-              }}>
-                « Notre mémoire est un trésor vivant. Chaque geste posé en son nom la rend plus lumineuse. »
-              </blockquote>
-            </div>
-          </section>
-        </div>
-      );
-    }
-
-    // ── Page: Contact ──────────────────────────────────────────────────────────
-    function PageContact() {
-      const [sent, setSent] = useState(false);
-      const [form, setForm] = useState({ nom: '', email: '', message: '' });
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        setSent(true);
-      };
-
-      return (
-        <div style={{ paddingTop: 68 }}>
-          <section style={{ background: T.encre, padding: '64px 32px 56px', textAlign: 'center' }}>
-            <SectionLabel light>Rejoignez-nous</SectionLabel>
-            <h1 style={{
-              fontFamily: 'EB Garamond, Garamond, serif',
-              fontSize: 'clamp(28px, 4vw, 48px)',
-              fontWeight: 700, color: T.creme, marginBottom: 16,
-            }}>Contact</h1>
-            <GoldDivider style={{ maxWidth: 300, margin: '0 auto' }} />
-          </section>
-
-          <section style={{ background: T.creme, padding: '80px 32px' }}>
-            <div
-              className="contact-grid"
-              style={{
-                maxWidth: 900, margin: '0 auto',
-                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64,
-              }}
-            >
-              {/* Coordonnées */}
-              <div>
-                <SectionLabel>Coordonnées</SectionLabel>
-                <h2 style={{
-                  fontFamily: 'EB Garamond, Garamond, serif',
-                  fontSize: 26, fontWeight: 700, color: T.encre, marginBottom: 24,
-                }}>Pauline Bastarache</h2>
-                <p style={{
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                  color: T.sepia, lineHeight: 1.8, marginBottom: 24, fontStyle: 'italic',
-                }}>
-                  Présidente fondatrice<br />Société Historique du Grand-Bouctouche
-                </p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {[
-                    { icon: '☎', label: '506-743-8517', href: 'tel:5067438517' },
-                    { icon: '☎', label: '506-955-2676', href: 'tel:5069552676' },
-                    { icon: '✉', label: 'paulinebast@hotmail.com', href: 'mailto:paulinebast@hotmail.com' },
-                  ].map(c => (
-                    <a key={c.label} href={c.href} style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 15,
-                      color: T.sepia, textDecoration: 'none', transition: 'color 0.2s',
-                    }}
-                      onMouseEnter={e => e.currentTarget.style.color = T.rouge}
-                      onMouseLeave={e => e.currentTarget.style.color = T.sepia}
-                    >
-                      <span style={{ color: T.or, fontSize: 16, width: 24, textAlign: 'center' }}>{c.icon}</span>
-                      {c.label}
-                    </a>
-                  ))}
-                </div>
-
-                <GoldDivider style={{ margin: '40px 0' }} />
-                <p style={{
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                  color: T.grisChaud, lineHeight: 1.8,
-                }}>Grand-Bouctouche, Nouveau-Brunswick, Canada</p>
-              </div>
-
-              {/* Formulaire */}
-              <div>
-                <SectionLabel>Nous écrire</SectionLabel>
-                <h2 style={{
-                  fontFamily: 'EB Garamond, Garamond, serif',
-                  fontSize: 26, fontWeight: 700, color: T.encre, marginBottom: 24,
-                }}>Partagez vos souvenirs</h2>
-
-                {sent ? (
-                  <div style={{
-                    background: T.parchemin, padding: 32,
-                    borderTop: `3px solid ${T.or}`, textAlign: 'center',
-                  }}>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif',
-                      fontSize: 18, fontStyle: 'italic', color: T.sepia,
-                    }}>Merci pour votre message!</p>
-                    <p style={{
-                      fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                      color: T.grisChaud, marginTop: 12,
-                    }}>Pauline vous contactera sous peu.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {[
-                      { id: 'nom', label: 'Nom', type: 'text', placeholder: 'Votre nom complet' },
-                      { id: 'email', label: 'Courriel', type: 'email', placeholder: 'votre@courriel.ca' },
-                    ].map(f => (
-                      <div key={f.id}>
-                        <label style={{
-                          fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
-                          fontWeight: 600, letterSpacing: '0.15em',
-                          textTransform: 'uppercase', color: T.or,
-                          display: 'block', marginBottom: 6,
-                        }}>{f.label}</label>
-                        <input
-                          type={f.type} required
-                          placeholder={f.placeholder}
-                          value={form[f.id]}
-                          onChange={e => setForm(p => ({ ...p, [f.id]: e.target.value }))}
-                          style={{
-                            width: '100%', background: T.parchemin,
-                            border: `1px solid ${T.or}30`,
-                            fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                            color: T.encre, padding: '10px 14px', outline: 'none',
-                          }}
-                          onFocus={e => e.target.style.borderColor = T.or}
-                          onBlur={e => e.target.style.borderColor = `${T.or}30`}
-                        />
-                      </div>
-                    ))}
-                    <div>
-                      <label style={{
-                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
-                        fontWeight: 600, letterSpacing: '0.15em',
-                        textTransform: 'uppercase', color: T.or,
-                        display: 'block', marginBottom: 6,
-                      }}>Message</label>
-                      <textarea
-                        required rows={5}
-                        placeholder="Partagez vos souvenirs, documents ou témoignages…"
-                        value={form.message}
-                        onChange={e => setForm(p => ({ ...p, message: e.target.value }))}
-                        style={{
-                          width: '100%', background: T.parchemin,
-                          border: `1px solid ${T.or}30`,
-                          fontFamily: 'EB Garamond, Garamond, serif', fontSize: 14,
-                          color: T.encre, padding: '10px 14px',
-                          resize: 'vertical', outline: 'none',
-                        }}
-                        onFocus={e => e.target.style.borderColor = T.or}
-                        onBlur={e => e.target.style.borderColor = `${T.or}30`}
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      style={{
-                        background: T.rouge, color: T.creme, border: 'none',
-                        fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                        fontWeight: 600, letterSpacing: '0.12em',
-                        textTransform: 'uppercase', padding: '14px',
-                        cursor: 'pointer', transition: 'background 0.2s',
-                        alignSelf: 'flex-start', minWidth: 200,
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = '#7A2E12'}
-                      onMouseLeave={e => e.currentTarget.style.background = T.rouge}
-                    >
-                      Envoyer le message
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-          </section>
-        </div>
-      );
-    }
-
-    // ── Footer ─────────────────────────────────────────────────────────────────
-    function Footer({ setPage }) {
-      return (
-        <footer style={{
-          background: T.encre, padding: '48px 32px 32px',
-          borderTop: `1px solid ${T.or}20`,
-        }}>
-          <div
-            className="footer-grid"
-            style={{
-              maxWidth: 1100, margin: '0 auto',
-              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-              gap: 48, marginBottom: 40,
-            }}
-          >
-            {/* Brand */}
-            <div>
-              <img
-                src="logo-v2.png"
-                alt="SHGB"
-                style={{
-                  height: 80, width: 80, objectFit: 'contain',
-                  borderRadius: '50%', background: T.creme,
-                  padding: 4, marginBottom: 16, display: 'block',
-                }}
-              />
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                color: T.grisChaud, lineHeight: 1.7,
-              }}>
-                Société Historique du Grand-Bouctouche<br />
-                Grand-Bouctouche, Nouveau-Brunswick
-              </p>
-            </div>
-
-            {/* Navigation */}
-            <div>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
-                fontWeight: 600, letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: T.or, marginBottom: 16,
-              }}>Navigation</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  { id: 'accueil', label: 'Accueil' },
-                  { id: 'histoire', label: 'Notre histoire' },
-                  { id: 'videos', label: 'Vidéos & Entrevues' },
-                  { id: 'equipe', label: "L'équipe" },
-                  { id: 'contact', label: 'Contact' },
-                ].map(item => (
-                  <button key={item.id} onClick={() => setPage(item.id)} style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                    color: T.grisChaud, textAlign: 'left',
-                    padding: 0, transition: 'color 0.2s',
-                  }}
-                    onMouseEnter={e => e.currentTarget.style.color = T.creme}
-                    onMouseLeave={e => e.currentTarget.style.color = T.grisChaud}
-                  >{item.label}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <p style={{
-                fontFamily: 'EB Garamond, Garamond, serif', fontSize: 10,
-                fontWeight: 600, letterSpacing: '0.18em',
-                textTransform: 'uppercase', color: T.or, marginBottom: 16,
-              }}>Contact</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <a href="tel:5067438517" style={{
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                  color: T.grisChaud, textDecoration: 'none',
-                }}>506-743-8517</a>
-                <a href="mailto:paulinebast@hotmail.com" style={{
-                  fontFamily: 'EB Garamond, Garamond, serif', fontSize: 13,
-                  color: T.grisChaud, textDecoration: 'none',
-                }}>paulinebast@hotmail.com</a>
-              </div>
-            </div>
-          </div>
-
-          <GoldDivider />
-
-          <div style={{
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            marginTop: 24, flexWrap: 'wrap', gap: 12,
-          }}>
-            <p style={{
-              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 12, color: T.grisChaud,
-            }}>
-              © 2025 Société Historique du Grand-Bouctouche. Tous droits réservés.
-            </p>
-            <p style={{
-              fontFamily: 'EB Garamond, Garamond, serif', fontSize: 11,
-              color: `${T.grisChaud}80`, fontStyle: 'italic',
-            }}>
-              Notre mémoire est un trésor vivant. ✦
-            </p>
-          </div>
-        </footer>
-      );
-    }
-
-    // ── App ────────────────────────────────────────────────────────────────────
-    function App() {
-      const [page, setPage] = useState('accueil');
-      const [scrolled, setScrolled] = useState(false);
-
-      useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 40);
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-      }, []);
-
-      useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }, [page]);
-
-      const renderPage = () => {
-        switch (page) {
-          case 'accueil':  return <PageAccueil setPage={setPage} />;
-          case 'histoire': return <PageHistoire />;
-          case 'videos':   return <PageVideos />;
-          case 'equipe':   return <PageEquipe />;
-          case 'contact':  return <PageContact />;
-          default:         return <PageAccueil setPage={setPage} />;
-        }
-      };
-
-      return (
         <div>
-          <Nav page={page} setPage={setPage} scrolled={page !== 'accueil' || scrolled} />
-          <main>{renderPage()}</main>
-          <Footer setPage={setPage} />
+          <p class="section-label">Nous écrire</p>
+          <h2 style="font-family:'EB Garamond',Garamond,serif;font-size:26px;font-weight:700;color:var(--encre);margin-bottom:24px;">Partagez vos souvenirs</h2>
+          <div class="form-success" id="form-success">
+            <p>Merci pour votre message!</p>
+            <p>Pauline vous contactera sous peu.</p>
+          </div>
+          <form id="contact-form" onsubmit="submitForm(event)">
+            <div class="form-group">
+              <div>
+                <label class="form-label">Nom</label>
+                <input type="text" class="form-input" placeholder="Votre nom complet" required />
+              </div>
+              <div>
+                <label class="form-label">Courriel</label>
+                <input type="email" class="form-input" placeholder="votre@courriel.ca" required />
+              </div>
+              <div>
+                <label class="form-label">Message</label>
+                <textarea class="form-input form-textarea" rows="5" placeholder="Partagez vos souvenirs, documents ou témoignages…" required></textarea>
+              </div>
+              <button type="submit" class="btn-rouge" style="align-self:flex-start;min-width:200px;">
+                Envoyer le message
+              </button>
+            </div>
+          </form>
         </div>
-      );
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <img src="logo-v2.png" alt="SHGB" class="footer-logo" />
+      <p class="footer-brand-text">
+        Société Historique du Grand-Bouctouche<br>
+        Grand-Bouctouche, Nouveau-Brunswick
+      </p>
+    </div>
+    <div>
+      <p class="footer-col-label">Navigation</p>
+      <div class="footer-links">
+        <button class="footer-link" onclick="goTo('accueil')">Accueil</button>
+        <button class="footer-link" onclick="goTo('histoire')">Notre histoire</button>
+        <button class="footer-link" onclick="goTo('videos')">Vidéos & Entrevues</button>
+        <button class="footer-link" onclick="goTo('equipe')">L'équipe</button>
+        <button class="footer-link" onclick="goTo('contact')">Contact</button>
+      </div>
+    </div>
+    <div>
+      <p class="footer-col-label">Contact</p>
+      <div class="footer-links">
+        <a href="tel:5067438517" class="footer-link">506-743-8517</a>
+        <a href="mailto:paulinebast@hotmail.com" class="footer-link">paulinebast@hotmail.com</a>
+      </div>
+    </div>
+  </div>
+  <div class="gold-divider"><span class="gold-divider-icon">✦</span></div>
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2025 Société Historique du Grand-Bouctouche. Tous droits réservés.</p>
+    <p class="footer-tagline">Notre mémoire est un trésor vivant. ✦</p>
+  </div>
+</footer>
+
+<!-- ── Modal vidéo ────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="video-modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-video-area">
+      <div class="modal-video-inner">
+        <p class="modal-video-label" id="modal-video-label">▶ Emplacement vidéo</p>
+        <p class="modal-video-sub">Insérez l'URL YouTube ou Vimeo ici</p>
+      </div>
+    </div>
+    <div class="modal-info">
+      <div class="modal-header">
+        <div>
+          <span class="modal-meta" id="modal-meta"></span>
+          <h2 class="modal-title" id="modal-title"></h2>
+          <p class="modal-desc" id="modal-desc"></p>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('video-modal').classList.remove('open')">✕</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Data ──────────────────────────────────────────────────────────────────
+  const VIDEOS = [
+    { id:1, titre:'Les débuts de la garde civile', desc:'Témoignage de Robert Landry sur les premiers corps policiers de la région.', categorie:'Sécurité publique', duree:'12:34', date:'2024' },
+    { id:2, titre:'La musique traditionnelle acadienne', desc:'Entrevue avec Marie-Anne Thibodeau, musicienne et dépositaire du répertoire local.', categorie:'Culture & Arts', duree:'18:22', date:'2024' },
+    { id:3, titre:'Le hockey au Grand-Bouctouche', desc:'Souvenirs de la ligue locale et des équipes qui ont marqué les années 1960–1980.', categorie:'Sports', duree:'24:10', date:'2024' },
+    { id:4, titre:"L'école Saint-Jean-Baptiste", desc:"Récits d'anciens élèves et d'enseignants sur l'éducation française en Acadie.", categorie:'Éducation', duree:'21:45', date:'2025' },
+    { id:5, titre:'La paroisse Sainte-Cécile', desc:"L'histoire de notre paroisse racontée par l'abbé Cormier et des paroissiens de longue date.", categorie:'Religion', duree:'16:08', date:'2025' },
+    { id:6, titre:'La vie des homardiers', desc:'Les pêcheurs du Grand-Bouctouche racontent leurs saisons en mer et les traditions transmises.', categorie:'Pêches', duree:'28:55', date:'2025' },
+    { id:7, titre:"Les fermes d'antan", desc:'Témoignages sur la vie agricole avant la mécanisation et les transformations du XXe siècle.', categorie:'Agriculture', duree:'19:30', date:'2025' },
+    { id:8, titre:'Les premiers commerces', desc:'Entrevue avec les descendants des familles fondatrices du commerce local.', categorie:'Industrie & Commerce', duree:'14:17', date:'2024' },
+    { id:9, titre:'Chants de mer et berceuses', desc:"Collection de chants traditionnels recueillis auprès des aînés de la région.", categorie:'Culture & Arts', duree:'32:00', date:'2025' },
+  ];
+
+  const CATEGORIES = ['Toutes','Sécurité publique','Culture & Arts','Sports','Éducation','Religion','Pêches','Agriculture','Industrie & Commerce'];
+  let currentCat = 'Toutes';
+  let currentPage = 'accueil';
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  function goTo(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+
+    document.querySelectorAll('.nav-link, .nav-mobile-link').forEach(el => {
+      el.classList.toggle('active', el.dataset.page === page);
+    });
+
+    const nav = document.getElementById('main-nav');
+    if (page === 'accueil') {
+      nav.classList.remove('solid');
+    } else {
+      nav.classList.add('solid');
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+    document.getElementById('nav-mobile').classList.remove('open');
+    document.querySelector('.nav-hamburger').textContent = '☰';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    currentPage = page;
+  }
+
+  function toggleMobile() {
+    const menu = document.getElementById('nav-mobile');
+    const btn = document.querySelector('.nav-hamburger');
+    const open = menu.classList.toggle('open');
+    btn.textContent = open ? '✕' : '☰';
+  }
+
+  // Nav scroll effect (accueil only)
+  window.addEventListener('scroll', () => {
+    if (currentPage === 'accueil') {
+      document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 40);
+    }
+  }, { passive: true });
+
+  // ── Videos ────────────────────────────────────────────────────────────────
+  function buildFilters() {
+    const container = document.getElementById('filters-inner');
+    container.innerHTML = CATEGORIES.map(cat => `
+      <button class="filter-btn ${cat === 'Toutes' ? 'active' : ''}"
+        onclick="setCat('${cat}')">${cat}</button>
+    `).join('');
+  }
+
+  function setCat(cat) {
+    currentCat = cat;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.textContent === cat);
+    });
+    renderVideos();
+  }
+
+  function filterVideos() { renderVideos(); }
+
+  function renderVideos() {
+    const q = document.getElementById('video-search').value.toLowerCase();
+    const filtered = VIDEOS.filter(v => {
+      const matchCat = currentCat === 'Toutes' || v.categorie === currentCat;
+      const matchQ = !q || v.titre.toLowerCase().includes(q) || v.desc.toLowerCase().includes(q);
+      return matchCat && matchQ;
+    });
+
+    const grid = document.getElementById('videos-grid');
+    const count = document.getElementById('videos-count');
+    const none = document.getElementById('no-results');
+
+    if (filtered.length === 0) {
+      grid.innerHTML = '';
+      count.textContent = '';
+      none.style.display = 'block';
+    } else {
+      none.style.display = 'none';
+      const label = currentCat !== 'Toutes' ? ` — ${currentCat}` : '';
+      count.textContent = `${filtered.length} entrevue${filtered.length > 1 ? 's' : ''}${label}`;
+      grid.innerHTML = filtered.map(v => `
+        <div class="video-card" onclick="openModal(${v.id})">
+          <div class="video-thumb">
+            <div class="video-thumb-stripe"></div>
+            <div class="video-thumb-center">
+              <div class="play-btn"><div class="play-triangle"></div></div>
+              <span class="video-duration">${v.duree}</span>
+            </div>
+            <div class="video-badge"><span>${v.categorie}</span></div>
+          </div>
+          <div class="video-info">
+            <h3>${v.titre}</h3>
+            <p>${v.desc}</p>
+            <span class="video-date">${v.date}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  function openModal(id) {
+    const v = VIDEOS.find(x => x.id === id);
+    if (!v) return;
+    document.getElementById('modal-video-label').textContent = `▶ Emplacement vidéo — ${v.titre}`;
+    document.getElementById('modal-meta').textContent = `${v.categorie} · ${v.duree} · ${v.date}`;
+    document.getElementById('modal-title').textContent = v.titre;
+    document.getElementById('modal-desc').textContent = v.desc;
+    document.getElementById('video-modal').classList.add('open');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('video-modal')) {
+      document.getElementById('video-modal').classList.remove('open');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('video-modal').classList.remove('open');
+  });
+
+  // ── Contact form ──────────────────────────────────────────────────────────
+  function submitForm(e) {
+    e.preventDefault();
+    document.getElementById('contact-form').style.display = 'none';
+    document.getElementById('form-success').classList.add('show');
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  buildFilters();
+  renderVideos();
+</script>
 </body>
 </html>
